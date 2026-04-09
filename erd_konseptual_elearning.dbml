@@ -1,0 +1,343 @@
+Project elearning_siswa {
+  database_type: 'PostgreSQL'
+  Note: '''
+  ERD konseptual untuk sistem e-learning dengan role terpisah:
+  Admin Sistem, Kajur, Guru, dan Siswa.
+  Fokus utama relasi: kelas, mapel, pengampu, pertemuan, materi, tugas, submission, nilai.
+  '''
+}
+
+Enum user_status {
+  active
+  inactive
+}
+
+Enum academic_period_status {
+  active
+  inactive
+  archived
+}
+
+Enum day_of_week {
+  monday
+  tuesday
+  wednesday
+  thursday
+  friday
+  saturday
+  sunday
+}
+
+Enum meeting_status {
+  draft
+  published
+  closed
+}
+
+Enum assignment_status {
+  draft
+  published
+  closed
+}
+
+Enum submission_status {
+  not_submitted
+  submitted
+  late
+  returned
+}
+
+Table roles {
+  id int [pk, increment]
+  code varchar(50) [not null, unique, note: 'Contoh: admin_system, kajur, guru, siswa']
+  name varchar(100) [not null]
+  description text
+  created_at timestamp
+}
+
+Table users {
+  id uuid [pk]
+  full_name varchar(150) [not null]
+  username varchar(100) [unique]
+  email varchar(150) [unique]
+  password_hash text [not null]
+  status user_status [not null, default: 'active']
+  last_login_at timestamp
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table user_roles {
+  id uuid [pk]
+  user_id uuid [not null]
+  role_id int [not null]
+  assigned_at timestamp
+  assigned_by uuid [note: 'User yang memberikan role']
+
+  Indexes {
+    (user_id, role_id) [unique]
+  }
+}
+
+Table departments {
+  id uuid [pk]
+  code varchar(50) [not null, unique]
+  name varchar(150) [not null]
+  description text
+  is_active boolean [not null, default: true]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table department_head_assignments {
+  id uuid [pk]
+  department_id uuid [not null]
+  user_id uuid [not null, note: 'User yang berperan sebagai Kajur']
+  start_date date [not null]
+  end_date date
+  is_active boolean [not null, default: true]
+  appointed_by uuid [note: 'User yang menetapkan jabatan kajur']
+  created_at timestamp
+
+  Indexes {
+    (department_id, user_id, start_date) [unique]
+  }
+}
+
+Table academic_years {
+  id uuid [pk]
+  name varchar(20) [not null, unique, note: 'Contoh: 2026/2027']
+  start_date date [not null]
+  end_date date [not null]
+  status academic_period_status [not null, default: 'active']
+  created_at timestamp
+}
+
+Table semesters {
+  id uuid [pk]
+  academic_year_id uuid [not null]
+  code varchar(20) [not null, note: 'Contoh: ganjil / genap']
+  name varchar(50) [not null]
+  start_date date [not null]
+  end_date date [not null]
+  status academic_period_status [not null, default: 'active']
+  created_at timestamp
+
+  Indexes {
+    (academic_year_id, code) [unique]
+  }
+}
+
+Table teachers {
+  id uuid [pk]
+  user_id uuid [not null, unique]
+  department_id uuid [note: 'Jurusan utama guru bila diperlukan']
+  employee_number varchar(50) [unique, note: 'Contoh: NIP / NUPTK']
+  phone varchar(30)
+  is_active boolean [not null, default: true]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table students {
+  id uuid [pk]
+  user_id uuid [not null, unique]
+  student_number varchar(50) [not null, unique, note: 'Contoh: NIS / NISN']
+  phone varchar(30)
+  gender varchar(20)
+  is_active boolean [not null, default: true]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table subjects {
+  id uuid [pk]
+  department_id uuid [note: 'Nullable bila mapel bersifat umum']
+  code varchar(50) [not null, unique]
+  name varchar(150) [not null]
+  grade_level int [note: 'Contoh: 10, 11, 12']
+  description text
+  is_active boolean [not null, default: true]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table class_groups {
+  id uuid [pk]
+  department_id uuid [not null]
+  academic_year_id uuid [not null]
+  homeroom_teacher_id uuid [note: 'Guru wali kelas, opsional']
+  code varchar(50) [not null, unique]
+  name varchar(100) [not null, note: 'Contoh: XI RPL 1']
+  grade_level int [not null]
+  capacity int
+  is_active boolean [not null, default: true]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table student_class_enrollments {
+  id uuid [pk]
+  student_id uuid [not null]
+  class_group_id uuid [not null]
+  enrolled_at date [not null]
+  status varchar(30) [not null, default: 'active']
+  notes text
+  created_at timestamp
+
+  Indexes {
+    (student_id, class_group_id) [unique]
+  }
+}
+
+Table teaching_assignments {
+  id uuid [pk]
+  teacher_id uuid [not null]
+  class_group_id uuid [not null]
+  subject_id uuid [not null]
+  semester_id uuid [not null]
+  assigned_by uuid [note: 'Biasanya Kajur atau Admin Akademik sesuai kebijakan']
+  is_active boolean [not null, default: true]
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    (teacher_id, class_group_id, subject_id, semester_id) [unique]
+  }
+}
+
+Table class_schedules {
+  id uuid [pk]
+  teaching_assignment_id uuid [not null]
+  day day_of_week [not null]
+  start_time time [not null]
+  end_time time [not null]
+  room_name varchar(100)
+  is_active boolean [not null, default: true]
+  created_at timestamp
+}
+
+Table meetings {
+  id uuid [pk]
+  teaching_assignment_id uuid [not null]
+  schedule_id uuid [note: 'Opsional, jika pertemuan mengacu ke slot jadwal tertentu']
+  meeting_number int [not null]
+  title varchar(150) [not null]
+  topic text
+  meeting_date date
+  start_time time
+  end_time time
+  status meeting_status [not null, default: 'draft']
+  published_at timestamp
+  created_by uuid [not null]
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    (teaching_assignment_id, meeting_number) [unique]
+  }
+}
+
+Table materials {
+  id uuid [pk]
+  meeting_id uuid [not null]
+  title varchar(150) [not null]
+  description text
+  file_url text
+  file_type varchar(50)
+  published_at timestamp
+  created_by uuid [not null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table assignments {
+  id uuid [pk]
+  meeting_id uuid [not null]
+  title varchar(150) [not null]
+  instructions text
+  open_at timestamp
+  due_at timestamp [not null]
+  max_score numeric(5,2) [not null, default: 100]
+  submission_type varchar(50) [note: 'file, text, link, atau kombinasi']
+  status assignment_status [not null, default: 'draft']
+  created_by uuid [not null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table assignment_submissions {
+  id uuid [pk]
+  assignment_id uuid [not null]
+  student_id uuid [not null]
+  submitted_at timestamp
+  submission_text text
+  file_url text
+  status submission_status [not null, default: 'not_submitted']
+  student_notes text
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    (assignment_id, student_id) [unique]
+  }
+}
+
+Table assignment_grades {
+  id uuid [pk]
+  submission_id uuid [not null, unique]
+  graded_by_teacher_id uuid [not null]
+  score numeric(5,2) [not null]
+  feedback text
+  graded_at timestamp [not null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Ref: user_roles.user_id > users.id
+Ref: user_roles.role_id > roles.id
+Ref: user_roles.assigned_by > users.id
+
+Ref: department_head_assignments.department_id > departments.id
+Ref: department_head_assignments.user_id > users.id
+Ref: department_head_assignments.appointed_by > users.id
+
+Ref: semesters.academic_year_id > academic_years.id
+
+Ref: teachers.user_id > users.id
+Ref: teachers.department_id > departments.id
+
+Ref: students.user_id > users.id
+
+Ref: subjects.department_id > departments.id
+
+Ref: class_groups.department_id > departments.id
+Ref: class_groups.academic_year_id > academic_years.id
+Ref: class_groups.homeroom_teacher_id > teachers.id
+
+Ref: student_class_enrollments.student_id > students.id
+Ref: student_class_enrollments.class_group_id > class_groups.id
+
+Ref: teaching_assignments.teacher_id > teachers.id
+Ref: teaching_assignments.class_group_id > class_groups.id
+Ref: teaching_assignments.subject_id > subjects.id
+Ref: teaching_assignments.semester_id > semesters.id
+Ref: teaching_assignments.assigned_by > users.id
+
+Ref: class_schedules.teaching_assignment_id > teaching_assignments.id
+
+Ref: meetings.teaching_assignment_id > teaching_assignments.id
+Ref: meetings.schedule_id > class_schedules.id
+Ref: meetings.created_by > users.id
+
+Ref: materials.meeting_id > meetings.id
+Ref: materials.created_by > users.id
+
+Ref: assignments.meeting_id > meetings.id
+Ref: assignments.created_by > users.id
+
+Ref: assignment_submissions.assignment_id > assignments.id
+Ref: assignment_submissions.student_id > students.id
+
+Ref: assignment_grades.submission_id > assignment_submissions.id
+Ref: assignment_grades.graded_by_teacher_id > teachers.id

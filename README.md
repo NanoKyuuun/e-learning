@@ -48,7 +48,7 @@ Project ini mengikuti standar engineering tinggi:
 
 ## 🐳 Docker Staging (Live Test)
 
-Project ini sudah dilengkapi dengan konfigurasi Docker untuk keperluan staging atau uji coba di lingkungan produksi.
+Project ini menggunakan struktur kontainer terpisah untuk PHP-FPM, Nginx, dan MySQL.
 
 1. **Jalankan dengan Docker Compose**
    ```bash
@@ -59,9 +59,12 @@ Project ini sudah dilengkapi dengan konfigurasi Docker untuk keperluan staging a
 2. **Akses Aplikasi**
    Aplikasi akan berjalan di `http://localhost:8085`.
 
-3. **Setup Database di Container**
+3. **Setup Aplikasi di Container**
    ```bash
-   docker exec -it elearning-app php artisan migrate --seed
+   docker-compose exec app composer install
+   docker-compose exec app php artisan key:generate
+   docker-compose exec app php artisan migrate --seed
+   docker-compose exec app php artisan storage:link
    ```
 
 ## 🛠️ Instalasi Lokal (Non-Docker)

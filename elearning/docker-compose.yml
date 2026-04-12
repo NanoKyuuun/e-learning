@@ -10,7 +10,6 @@ services:
       - "8085:80"
     volumes:
       - ./.env:/var/www/html/.env
-      - ./storage:/var/www/html/storage
     depends_on:
       - db
     networks:

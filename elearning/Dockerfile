@@ -32,6 +32,9 @@ WORKDIR /var/www/html
 COPY . .
 COPY --from=build-assets /app/public/build ./public/build
 
+# Remove vite dev server file if exists
+RUN rm -f public/hot
+
 # Install composer dependencies
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN composer install --no-dev --optimize-autoloader --no-interaction

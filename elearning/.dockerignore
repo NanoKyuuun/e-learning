@@ -7,6 +7,7 @@ Dockerfile
 docker-compose.yml
 storage/*.key
 public/build
+public/hot
 public/storage
 tests
 phpunit.xml

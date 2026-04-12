@@ -46,7 +46,25 @@ Project ini mengikuti standar engineering tinggi:
 - **Laravel Policies**: Keamanan data dijamin di level model untuk mencegah akses lintas user.
 - **Universal Components**: Komponen form (TextInput, Select, dll) dibuat reusable di `resources/js/Components`.
 
-## 🛠️ Instalasi
+## 🐳 Docker Staging (Live Test)
+
+Project ini sudah dilengkapi dengan konfigurasi Docker untuk keperluan staging atau uji coba di lingkungan produksi.
+
+1. **Jalankan dengan Docker Compose**
+   ```bash
+   cd elearning
+   docker-compose up -d --build
+   ```
+
+2. **Akses Aplikasi**
+   Aplikasi akan berjalan di `http://localhost:8080`.
+
+3. **Setup Database di Container**
+   ```bash
+   docker exec -it elearning-app php artisan migrate --seed
+   ```
+
+## 🛠️ Instalasi Lokal (Non-Docker)
 
 1. **Clone Repository**
    ```bash

@@ -7,6 +7,7 @@ use App\Http\Controllers\Kajur\ClassEnrollmentController;
 use App\Http\Controllers\Kajur\TeachingAssignmentController;
 use App\Http\Controllers\Kajur\MonitoringController;
 use App\Http\Controllers\Kajur\DashboardController;
+use App\Http\Controllers\Kajur\ClassScheduleController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'role:kajur'])->prefix('kajur')->name('kajur.')->group(function () {
@@ -19,6 +20,12 @@ Route::middleware(['auth', 'role:kajur'])->prefix('kajur')->name('kajur.')->grou
     Route::get('class-groups/{class_group}/members', [ClassEnrollmentController::class, 'index'])->name('class-groups.members.index');
     Route::post('class-groups/{class_group}/members', [ClassEnrollmentController::class, 'store'])->name('class-groups.members.store');
     Route::delete('class-enrollments/{enrollment}', [ClassEnrollmentController::class, 'destroy'])->name('class-enrollments.destroy');
+
+    // Jadwal Pelajaran (per Assignment)
+    Route::get('teaching-assignments/{teaching_assignment}/schedules', [ClassScheduleController::class, 'index'])->name('schedules.index');
+    Route::post('schedules', [ClassScheduleController::class, 'store'])->name('schedules.store');
+    Route::put('schedules/{class_schedule}', [ClassScheduleController::class, 'update'])->name('schedules.update');
+    Route::delete('schedules/{class_schedule}', [ClassScheduleController::class, 'destroy'])->name('schedules.destroy');
 
     // Plotting Pengampu
     Route::resource('teaching-assignments', TeachingAssignmentController::class);

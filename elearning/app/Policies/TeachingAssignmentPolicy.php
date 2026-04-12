@@ -17,9 +17,22 @@ class TeachingAssignmentPolicy
             return $user->teacher->id === $teachingAssignment->teacher_id;
         }
 
+        // Siswa bisa melihat jika dia terdaftar di kelas tersebut
+        if ($user->hasRole('siswa')) {
+            return $user->student->enrollments()
+                ->where('class_group_id', $teachingAssignment->class_group_id)
+                ->exists();
+        }
+
         // Kajur hanya bisa melihat pengampu di jurusannya
         if ($user->hasRole('kajur')) {
-            return $user->teacher->department_id === $teachingAssignment->classGroup->department_id;
+            // Cek lewat penugasan kajur
+            $isHead = \App\Models\DepartmentHeadAssignment::where('user_id', $user->id)
+                ->where('department_id', $teachingAssignment->classGroup->department_id)
+                ->where('is_active', true)
+                ->exists();
+            
+            return $isHead;
         }
 
         // Admin bisa melihat semuanya

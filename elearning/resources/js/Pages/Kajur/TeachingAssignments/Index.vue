@@ -106,9 +106,14 @@ watch(search, debounce((value) => {
                                 <div class="badge badge-neutral badge-sm font-bold opacity-70">{{ item.semester.name }}</div>
                             </td>
                             <td class="text-center">
-                                <button @click="deleteAssignment(item.id)" class="btn btn-sm btn-square btn-ghost hover:bg-error/10 hover:text-error">
-                                    <Trash2 class="w-4 h-4" />
-                                </button>
+                                <div class="flex justify-center gap-1">
+                                    <Link :href="route('kajur.schedules.index', item.id)" class="btn btn-sm btn-square btn-ghost hover:bg-info/10 hover:text-info" title="Kelola Jadwal">
+                                        <Calendar class="w-4 h-4" />
+                                    </Link>
+                                    <button @click="deleteAssignment(item.id)" class="btn btn-sm btn-square btn-ghost hover:bg-error/10 hover:text-error">
+                                        <Trash2 class="w-4 h-4" />
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                         <tr v-if="assignments.data.length === 0">

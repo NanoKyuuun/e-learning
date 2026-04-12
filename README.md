@@ -57,7 +57,7 @@ Project ini sudah dilengkapi dengan konfigurasi Docker untuk keperluan staging a
    ```
 
 2. **Akses Aplikasi**
-   Aplikasi akan berjalan di `http://localhost:8080`.
+   Aplikasi akan berjalan di `http://localhost:8085`.
 
 3. **Setup Database di Container**
    ```bash

@@ -7,7 +7,7 @@ services:
     container_name: elearning-app
     restart: unless-stopped
     ports:
-      - "8085:80"
+      - "0.0.0.0:8085:80"
     volumes:
       - ./.env:/var/www/html/.env
     depends_on:

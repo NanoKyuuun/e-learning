@@ -14,12 +14,12 @@ class MaterialPolicy
 
     public function create(User $user): bool
     {
-        return $user->hasRole('guru');
+        return $user->hasRole('guru') && $user->teacher !== null;
     }
 
     public function update(User $user, Material $material): bool
     {
-        return $user->hasRole('guru') && $user->teacher->id === $material->meeting->teachingAssignment->teacher_id;
+        return $user->hasRole('guru') && $user->teacher && $user->teacher->id === $material->meeting->teachingAssignment->teacher_id;
     }
 
     public function delete(User $user, Material $material): bool

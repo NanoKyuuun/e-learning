@@ -1,10 +1,11 @@
 <?php
 
-use App\Http\Controllers\Guru\MeetingController;
-use App\Http\Controllers\Guru\MaterialController;
 use App\Http\Controllers\Guru\AssignmentController;
 use App\Http\Controllers\Guru\AssignmentGradeController;
+use App\Http\Controllers\Guru\FaceProfileController;
 use App\Http\Controllers\Guru\GradeController;
+use App\Http\Controllers\Guru\MaterialController;
+use App\Http\Controllers\Guru\MeetingController;
 use App\Models\TeachingAssignment;
 use App\Models\Meeting;
 use Illuminate\Support\Facades\Route;
@@ -74,4 +75,13 @@ Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(f
     // Grading & Recap
     Route::post('/submissions/{submission}/grade', [AssignmentGradeController::class, 'store'])->name('submissions.grade');
     Route::get('/grades', [GradeController::class, 'index'])->name('grades.index');
+
+    // ── Face Profile Management (per kelas yang diajar) ──────────────────
+    Route::prefix('teaching-assignments/{teachingAssignment}/face-profiles')
+        ->name('face-profiles.')
+        ->group(function () {
+            Route::get('/', [FaceProfileController::class, 'index'])->name('index');
+            Route::post('/resync-class', [FaceProfileController::class, 'resyncClass'])->name('resync-class');
+            Route::post('/students/{student}/resync', [FaceProfileController::class, 'resync'])->name('resync');
+        });
 });

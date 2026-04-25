@@ -22,21 +22,46 @@ class AuthenticatedSessionController extends Controller
         ]);
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
-            $request->session()->regenerate();
-
             $user = Auth::user();
 
-            if ($user->hasRole('admin-sistem')) {
-                return redirect()->intended(route('admin.dashboard'));
-            } elseif ($user->hasRole('kajur')) {
-                return redirect()->intended(route('kajur.dashboard'));
-            } elseif ($user->hasRole('guru')) {
-                return redirect()->intended(route('guru.dashboard'));
-            } elseif ($user->hasRole('siswa')) {
-                return redirect()->intended(route('siswa.dashboard'));
+            // Cek status user
+            if ($user->status !== 'active') {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return back()->withErrors([
+                    'email' => 'Akun Anda tidak aktif. Silakan hubungi admin.',
+                ])->onlyInput('email');
             }
 
-            return redirect()->intended(route('login'));
+            $request->session()->regenerate();
+
+            // Tentukan dashboard default berdasarkan role
+            $defaultDashboard = route('login');
+            $rolePrefix = '';
+
+            if ($user->hasRole('admin-sistem')) {
+                $defaultDashboard = route('admin.dashboard');
+                $rolePrefix = '/admin';
+            } elseif ($user->hasRole('kajur')) {
+                $defaultDashboard = route('kajur.dashboard');
+                $rolePrefix = '/kajur';
+            } elseif ($user->hasRole('guru')) {
+                $defaultDashboard = route('guru.dashboard');
+                $rolePrefix = '/guru';
+            } elseif ($user->hasRole('siswa')) {
+                $defaultDashboard = route('siswa.dashboard');
+                $rolePrefix = '/siswa';
+            }
+
+            // Validasi intended URL agar tidak nyasar ke area role lain (mencegah 403)
+            $intended = session()->get('url.intended');
+            if ($intended && $rolePrefix && !str_contains($intended, $rolePrefix)) {
+                session()->forget('url.intended');
+            }
+
+            return redirect()->intended($defaultDashboard);
         }
 
         return back()->withErrors([

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan Wajah</title>
+</head>
+<body>
+    <h1>Scan Wajah</h1>
+    <video id="video" autoplay></video>
+    <button id="capture">Scan</button>
+    <canvas id="canvas" style="display: none;"></canvas>
+    <p id="result"></p>
+
+    <script>
+        const video = document.getElementById("video");
+        const canvas = document.getElementById("canvas");
+        const captureButton = document.getElementById("capture");
+        const resultText = document.getElementById("result");
+
+        // Mengakses kamera
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(error => {
+                console.error("Kamera tidak tersedia:", error);
+            });
+
+        // Mengambil foto dari video dan mengirim ke backend
+        captureButton.addEventListener("click", () => {
+            const context = canvas.getContext("2d");
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const imageData = canvas.toDataURL("image/jpeg");
+
+            fetch("/scan", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ image: imageData })
+            })
+            .then(response => response.json())
+            .then(data => {
+                resultText.textContent = data.message + " - " + data.name;
+            })
+            .catch(error => console.error("Gagal mengirim gambar:", error));
+        });
+    </script>
+</body>
+</html>

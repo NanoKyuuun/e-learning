@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\FaceProfile;
+use App\Observers\FaceProfileObserver;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +21,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Daftarkan observer untuk auto-sync face profile ke Python
+        FaceProfile::observe(FaceProfileObserver::class);
     }
 }

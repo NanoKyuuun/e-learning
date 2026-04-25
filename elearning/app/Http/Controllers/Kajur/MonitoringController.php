@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Kajur;
 
 use App\Http\Controllers\Controller;
 use App\Models\ClassGroup;
+use App\Models\DepartmentHeadAssignment;
 use App\Models\TeachingAssignment;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -12,7 +13,15 @@ class MonitoringController extends Controller
 {
     public function progress(Request $request)
     {
-        $deptId = auth()->user()->teacher->department_id;
+        $assignment = DepartmentHeadAssignment::where('user_id', auth()->id())
+            ->where('is_active', true)
+            ->first();
+
+        if (!$assignment) {
+            abort(403, 'Anda tidak memiliki penugasan sebagai Kepala Jurusan.');
+        }
+
+        $deptId = $assignment->department_id;
 
         // Ambil semua kelas di jurusan kajur ini
         $classes = ClassGroup::with([
@@ -31,8 +40,12 @@ class MonitoringController extends Controller
 
     public function classDetail(ClassGroup $classGroup)
     {
+        $assignment = DepartmentHeadAssignment::where('user_id', auth()->id())
+            ->where('is_active', true)
+            ->first();
+
         // Pastikan kelas ini milik jurusan kajur tersebut
-        if ($classGroup->department_id !== auth()->user()->teacher->department_id) {
+        if (!$assignment || $classGroup->department_id !== $assignment->department_id) {
             abort(403);
         }
 
@@ -53,7 +66,15 @@ class MonitoringController extends Controller
 
     public function grades(Request $request)
     {
-        $deptId = auth()->user()->teacher->department_id;
+        $assignment = DepartmentHeadAssignment::where('user_id', auth()->id())
+            ->where('is_active', true)
+            ->first();
+
+        if (!$assignment) {
+            abort(403, 'Anda tidak memiliki penugasan sebagai Kepala Jurusan.');
+        }
+
+        $deptId = $assignment->department_id;
 
         // Daftar kelas untuk dipilih kajur
         $classes = ClassGroup::where('department_id', $deptId)->get();

@@ -31,4 +31,19 @@ class Student extends Model
     {
         return $this->hasMany(AssignmentSubmission::class);
     }
+
+    public function faceProfile()
+    {
+        return $this->hasOne(FaceProfile::class);
+    }
+
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
+    }
+
+    public function attendanceAttempts()
+    {
+        return $this->hasMany(AttendanceAttempt::class);
+    }
 }

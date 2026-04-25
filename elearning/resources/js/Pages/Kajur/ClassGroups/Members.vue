@@ -49,7 +49,7 @@ const enroll = () => {
 
 const removeStudent = (enrollmentId) => {
     if (confirm('Keluarkan siswa ini dari kelas?')) {
-        router.delete(route('class-enrollments.destroy', enrollmentId));
+        router.delete(route('kajur.class-enrollments.destroy', enrollmentId));
     }
 };
 </script>

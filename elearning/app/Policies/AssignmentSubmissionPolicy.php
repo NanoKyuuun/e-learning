@@ -11,12 +11,12 @@ class AssignmentSubmissionPolicy
     {
         // Guru pengampu bisa melihat
         if ($user->hasRole('guru')) {
-            return $user->teacher->id === $submission->assignment->meeting->teachingAssignment->teacher_id;
+            return $user->teacher && $user->teacher->id === $submission->assignment->meeting->teachingAssignment->teacher_id;
         }
 
         // Siswa pemilik bisa melihat
         if ($user->hasRole('siswa')) {
-            return $user->student->id === $submission->student_id;
+            return $user->student && $user->student->id === $submission->student_id;
         }
 
         return $user->hasRole('admin-sistem');
@@ -24,6 +24,6 @@ class AssignmentSubmissionPolicy
 
     public function grade(User $user, AssignmentSubmission $submission): bool
     {
-        return $user->hasRole('guru') && $user->teacher->id === $submission->assignment->meeting->teachingAssignment->teacher_id;
+        return $user->hasRole('guru') && $user->teacher && $user->teacher->id === $submission->assignment->meeting->teachingAssignment->teacher_id;
     }
 }

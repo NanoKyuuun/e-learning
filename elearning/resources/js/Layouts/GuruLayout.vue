@@ -9,7 +9,8 @@ import {
     ClipboardList, 
     Inbox, 
     GraduationCap, 
-    BarChart3 
+    BarChart3,
+    Users
 } from 'lucide-vue-next';
 </script>
 

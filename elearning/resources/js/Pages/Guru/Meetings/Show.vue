@@ -1,7 +1,10 @@
 <script setup>
 import GuruLayout from '@/Layouts/GuruLayout.vue';
 import { Head, Link, useForm, router } from '@inertiajs/vue3';
-import { FileText, ClipboardList, Plus, Trash2, ArrowLeft, Download, ExternalLink, Calendar, Presentation, Clock, FileUp } from 'lucide-vue-next';
+import {
+    FileText, ClipboardList, Plus, Trash2, ArrowLeft, Download, ExternalLink,
+    Calendar, Clock, FileUp, Users, CheckCircle, XCircle, ShieldCheck, AlertCircle
+} from 'lucide-vue-next';
 import { ref } from 'vue';
 import TextInput from '@/Components/forms/input/TextInput.vue';
 import TextareaInput from '@/Components/forms/input/TextareaInput.vue';
@@ -9,7 +12,9 @@ import SelectInput from '@/Components/forms/input/SelectInput.vue';
 import DateInput from '@/Components/forms/input/DateInput.vue';
 
 const props = defineProps({
-    meeting: Object,
+    meeting:           Object,
+    enrolledStudents:  Array,
+    attendanceSummary: Object,
 });
 
 const isMaterialModalOpen = ref(false);
@@ -247,5 +252,110 @@ const deleteAssignment = (id) => {
             </div>
             <label class="modal-backdrop" @click="isAssignmentModalOpen = false">Close</label>
         </div>
+        <!-- Section Rekap Absensi ──────────────────────────────────── -->
+        <div class="mt-8">
+            <div class="bg-base-100 rounded-3xl border border-base-200 shadow-sm overflow-hidden">
+                <!-- Header -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 border-b border-base-200">
+                    <h2 class="text-xl font-black flex items-center gap-2 text-accent uppercase tracking-tight">
+                        <Users class="w-6 h-6" /> Rekap Absensi Siswa
+                    </h2>
+                    <!-- Summary Badges -->
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <div class="stat bg-base-200 rounded-2xl p-3 text-center min-w-[70px]">
+                            <div class="stat-value text-2xl font-black">{{ attendanceSummary.total }}</div>
+                            <div class="stat-desc font-bold">Total</div>
+                        </div>
+                        <div class="stat bg-success/10 rounded-2xl p-3 text-center min-w-[70px]">
+                            <div class="stat-value text-2xl font-black text-success">{{ attendanceSummary.present }}</div>
+                            <div class="stat-desc font-bold text-success">Hadir</div>
+                        </div>
+                        <div class="stat bg-error/10 rounded-2xl p-3 text-center min-w-[70px]">
+                            <div class="stat-value text-2xl font-black text-error">{{ attendanceSummary.absent }}</div>
+                            <div class="stat-desc font-bold text-error">Belum</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabel Siswa -->
+                <div class="overflow-x-auto">
+                    <table class="table table-zebra w-full">
+                        <thead>
+                            <tr class="text-xs uppercase tracking-widest opacity-50">
+                                <th>#</th>
+                                <th>Nama Siswa</th>
+                                <th>Status Wajah</th>
+                                <th>Status Absensi</th>
+                                <th>Pukul</th>
+                                <th>Verifikasi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(student, idx) in enrolledStudents" :key="student.id"
+                                :class="student.attendance ? '' : 'opacity-60'">
+                                <td class="font-bold opacity-40">{{ idx + 1 }}</td>
+                                <td>
+                                    <span class="font-bold">{{ student.name }}</span>
+                                </td>
+                                <td>
+                                    <span :class="['badge badge-sm font-bold', {
+                                        'badge-success': student.face_status === 'synced',
+                                        'badge-warning': ['pending','syncing'].includes(student.face_status),
+                                        'badge-error':   student.face_status === 'failed',
+                                        'badge-ghost':   student.face_status === 'none' || student.face_status === 'disabled',
+                                    }]">
+                                        {{ student.face_status === 'synced' ? 'Siap'
+                                         : student.face_status === 'pending' ? 'Pending'
+                                         : student.face_status === 'syncing' ? 'Sync'
+                                         : student.face_status === 'failed'  ? 'Gagal'
+                                         : 'Belum' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div v-if="student.attendance">
+                                        <span :class="['badge font-bold', {
+                                            'badge-success': student.attendance.status === 'present',
+                                            'badge-warning': student.attendance.status === 'late',
+                                            'badge-error':   student.attendance.status === 'failed',
+                                            'badge-info':    student.attendance.status === 'manual',
+                                            'badge-ghost':   ['excused','absent'].includes(student.attendance.status),
+                                        }]">
+                                            {{ {
+                                                present: 'Hadir',
+                                                late: 'Terlambat',
+                                                failed: 'Gagal',
+                                                manual: 'Manual',
+                                                excused: 'Izin',
+                                                absent: 'Tidak Hadir',
+                                            }[student.attendance.status] ?? student.attendance.status }}
+                                        </span>
+                                    </div>
+                                    <span v-else class="text-xs opacity-40 italic">Belum absen</span>
+                                </td>
+                                <td class="text-sm font-mono">
+                                    {{ student.attendance?.check_in_at ?? '—' }}
+                                </td>
+                                <td>
+                                    <div v-if="student.attendance?.face_verified" class="flex items-center gap-1 text-success text-xs font-bold">
+                                        <CheckCircle class="w-4 h-4" />
+                                        {{ student.attendance.face_distance?.toFixed(3) }}
+                                    </div>
+                                    <div v-else-if="student.attendance && !student.attendance.face_verified" class="flex items-center gap-1 text-warning text-xs font-bold">
+                                        <AlertCircle class="w-4 h-4" /> Manual
+                                    </div>
+                                    <span v-else class="text-xs opacity-30">—</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div v-if="!enrolledStudents || enrolledStudents.length === 0"
+                         class="p-12 text-center opacity-40 italic">
+                        Belum ada siswa terdaftar di kelas ini.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- ──────────────────────────────────────────────────────────────── -->
     </GuruLayout>
 </template>

@@ -15,12 +15,12 @@ class AssignmentPolicy
 
     public function create(User $user): bool
     {
-        return $user->hasRole('guru');
+        return $user->hasRole('guru') && $user->teacher !== null;
     }
 
     public function update(User $user, Assignment $assignment): bool
     {
-        return $user->hasRole('guru') && $user->teacher->id === $assignment->meeting->teachingAssignment->teacher_id;
+        return $user->hasRole('guru') && $user->teacher && $user->teacher->id === $assignment->meeting->teachingAssignment->teacher_id;
     }
 
     public function delete(User $user, Assignment $assignment): bool

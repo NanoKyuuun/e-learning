@@ -14,12 +14,12 @@ class TeachingAssignmentPolicy
     {
         // Guru hanya bisa melihat pengampu miliknya sendiri
         if ($user->hasRole('guru')) {
-            return $user->teacher->id === $teachingAssignment->teacher_id;
+            return $user->teacher && $user->teacher->id === $teachingAssignment->teacher_id;
         }
 
         // Siswa bisa melihat jika dia terdaftar di kelas tersebut
         if ($user->hasRole('siswa')) {
-            return $user->student->enrollments()
+            return $user->student && $user->student->enrollments()
                 ->where('class_group_id', $teachingAssignment->class_group_id)
                 ->exists();
         }

@@ -1,48 +1,31 @@
 services:
-  # PHP Service
   app:
     build:
-      args:
-        user: elearning
-        uid: 1000
       context: .
       dockerfile: Dockerfile
-    image: elearning-app
+    image: elearning-siswa:latest
     container_name: elearning-app
     restart: unless-stopped
-    working_dir: /var/www
-    volumes:
-      - ./:/var/www
-    networks:
-      - elearning-network
-
-  # Nginx Service
-  web:
-    image: nginx:alpine
-    container_name: elearning-web
-    restart: unless-stopped
     ports:
-      - "8085:80"
+      - "0.0.0.0:8085:80"
     volumes:
-      - ./:/var/www
-      - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
+      - ./.env:/var/www/html/.env
+    depends_on:
+      - db
     networks:
       - elearning-network
 
-  # MySQL Service
   db:
     image: mysql:8.0
     container_name: elearning-db
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: ${DB_DATABASE}
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_DATABASE: elearning
+      MYSQL_ROOT_PASSWORD: root
     ports:
       - "3315:3306"
     volumes:
-      - dbdata:/var/lib/mysql
+      - db-data:/var/lib/mysql
     networks:
       - elearning-network
 
@@ -51,5 +34,4 @@ networks:
     driver: bridge
 
 volumes:
-  dbdata:
-    driver: local
+  db-data:

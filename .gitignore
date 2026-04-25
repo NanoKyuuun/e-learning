@@ -1,0 +1,13 @@
+/elearning/.env
+/face_recognition/.env
+/face_recognition/venv/
+/face_recognition/storage/embeddings/*.json
+/face_recognition/storage/reference_images/*
+!/face_recognition/storage/reference_images/.gitkeep
+/face_recognition/__pycache__/
+/face_recognition/routes/__pycache__/
+/face_recognition/services/__pycache__/
+node_modules/
+public/build/
+storage/*.key
+.phpunit.result.cache

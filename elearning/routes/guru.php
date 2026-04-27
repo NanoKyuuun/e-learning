@@ -59,6 +59,8 @@ Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(f
     Route::post('/teaching-assignments/{teachingAssignment}/meetings', [MeetingController::class, 'store'])->name('meetings.store');
     Route::get('/meetings/{meeting}', [MeetingController::class, 'show'])->name('meetings.show');
     Route::patch('/meetings/{meeting}/publish', [MeetingController::class, 'publish'])->name('meetings.publish');
+    Route::patch('/meetings/{meeting}/activate', [MeetingController::class, 'activate'])->name('meetings.activate');
+    Route::patch('/meetings/{meeting}/close', [MeetingController::class, 'close'])->name('meetings.close');
     Route::delete('/meetings/{meeting}', [MeetingController::class, 'destroy'])->name('meetings.destroy');
 
     // Materials

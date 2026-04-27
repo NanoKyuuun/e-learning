@@ -99,6 +99,20 @@ class MeetingController extends Controller
         return redirect()->back()->with('success', 'Pertemuan berhasil dipublikasikan.');
     }
 
+    public function activate(Meeting $meeting)
+    {
+        $this->authorize('update', $meeting);
+        $this->meetingService->activateMeeting($meeting);
+        return redirect()->back()->with('success', 'Absensi berhasil dibuka! Siswa sekarang dapat melakukan presensi wajah.');
+    }
+
+    public function close(Meeting $meeting)
+    {
+        $this->authorize('update', $meeting);
+        $this->meetingService->closeMeeting($meeting);
+        return redirect()->back()->with('success', 'Absensi berhasil ditutup. Pertemuan selesai.');
+    }
+
     public function destroy(Meeting $meeting)
     {
         $this->authorize('delete', $meeting);

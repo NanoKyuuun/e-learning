@@ -6,6 +6,8 @@ import {
     Camera, CheckCircle, XCircle, Clock, AlertTriangle, Loader2, ShieldCheck
 } from 'lucide-vue-next';
 import { ref, computed } from 'vue';
+import axios from 'axios';
+import { router } from '@inertiajs/vue3';
 
 const props = defineProps({
     meeting:           Object,
@@ -118,26 +120,30 @@ const submitAttendance = () => {
     isSubmitting.value = true;
     attendanceResult.value = null;
 
-    attendanceForm.image = file;
-    attendanceForm.post(route('siswa.attendance.face.store', props.meeting.id), {
-        forceFormData: true,
-        onSuccess: () => {
-            attendanceResult.value = {
-                success: true,
-                message: 'Absensi berhasil dicatat!',
-            };
-            isSubmitting.value = false;
-        },
-        onError: (errors) => {
-            attendanceResult.value = {
-                success: false,
-                message: errors.message ?? 'Absensi gagal. Coba lagi.',
-            };
-            isSubmitting.value = false;
-        },
-        onFinish: () => {
-            isSubmitting.value = false;
-        },
+    const formData = new FormData();
+    formData.append('image', file);
+
+    axios.post(route('siswa.attendance.face.store', props.meeting.id), formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    })
+    .then(response => {
+        attendanceResult.value = {
+            success: true,
+            message: response.data.message || 'Absensi berhasil dicatat!',
+        };
+        // Reload data absensi di background agar tampilan utama terupdate
+        router.reload({ only: ['myAttendance'] });
+    })
+    .catch(error => {
+        attendanceResult.value = {
+            success: false,
+            message: error.response?.data?.message ?? 'Absensi gagal. Coba lagi.',
+        };
+    })
+    .finally(() => {
+        isSubmitting.value = false;
     });
 };
 </script>

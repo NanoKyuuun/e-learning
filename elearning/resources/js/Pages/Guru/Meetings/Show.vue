@@ -70,6 +70,18 @@ const deleteAssignment = (id) => {
         router.delete(route('guru.assignments.destroy', id));
     }
 };
+
+const openAttendance = () => {
+    if (confirm('Buka sesi absensi sekarang? Siswa akan bisa melakukan verifikasi wajah.')) {
+        router.patch(route('guru.meetings.activate', props.meeting.id));
+    }
+};
+
+const closeAttendance = () => {
+    if (confirm('Tutup sesi absensi? Siswa yang belum absen akan dianggap tidak hadir / alpa jika belum absen.')) {
+        router.patch(route('guru.meetings.close', props.meeting.id));
+    }
+};
 </script>
 
 <template>
@@ -92,13 +104,24 @@ const deleteAssignment = (id) => {
                             <span class="text-xs font-bold opacity-50 flex items-center gap-1">
                                 <Calendar class="w-3 h-3" /> {{ meeting.meeting_date || 'Tgl belum diatur' }}
                             </span>
-                            <span :class="['badge badge-xs font-bold', meeting.status === 'published' ? 'badge-success' : 'badge-warning']">
+                            <span :class="['badge badge-xs font-bold', 
+                                meeting.status === 'active' ? 'badge-success' : 
+                                meeting.status === 'completed' ? 'badge-neutral' : 
+                                meeting.status === 'published' ? 'badge-info' : 'badge-warning']">
                                 {{ meeting.status.toUpperCase() }}
                             </span>
                         </div>
                     </div>
                 </div>
-                <div class="flex gap-2">
+                <div class="flex flex-wrap gap-2 justify-end">
+                    <!-- Tombol Absensi -->
+                    <button v-if="meeting.status === 'published'" @click="openAttendance" class="btn btn-success btn-sm md:btn-md gap-2 shadow-lg shadow-success/20 text-white">
+                        <CheckCircle class="w-4 h-4" /> Buka Absensi
+                    </button>
+                    <button v-if="meeting.status === 'active'" @click="closeAttendance" class="btn btn-error btn-sm md:btn-md gap-2 shadow-lg shadow-error/20 text-white">
+                        <XCircle class="w-4 h-4" /> Tutup Absensi
+                    </button>
+
                     <button @click="isMaterialModalOpen = true" class="btn btn-primary btn-sm md:btn-md gap-2 shadow-lg shadow-primary/20">
                         <Plus class="w-4 h-4" /> Tambah Materi
                     </button>

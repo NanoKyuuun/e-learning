@@ -62,8 +62,6 @@ class FaceProfileController extends Controller
             'local'
         );
 
-        $hash = Hash::make(file_get_contents($request->file('image')->getRealPath()));
-
         // Buat atau ganti face profile (updateOrCreate agar tidak duplikat)
         $faceProfile = FaceProfile::updateOrCreate(
             ['student_id' => $student->id],

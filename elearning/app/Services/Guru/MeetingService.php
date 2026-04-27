@@ -40,6 +40,20 @@ class MeetingService
         ]);
     }
 
+    public function activateMeeting(Meeting $meeting)
+    {
+        return $meeting->update([
+            'status' => 'active'
+        ]);
+    }
+
+    public function closeMeeting(Meeting $meeting)
+    {
+        return $meeting->update([
+            'status' => 'completed'
+        ]);
+    }
+
     public function deleteMeeting(Meeting $meeting)
     {
         return $meeting->delete();

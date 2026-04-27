@@ -31,8 +31,19 @@ const submit = () => {
 
     <KajurLayout>
         <div class="mb-8 flex items-center gap-4">
-            <h1 class="text-3xl font-black text-base-content tracking-tight uppercase">Edit Profil Siswa</h1>
-            <div class="badge badge-lg badge-outline opacity-50">{{ student.user.full_name }}</div>
+            <!-- Avatar -->
+            <div class="avatar" :class="student.user.avatar ? '' : 'placeholder'">
+                <div v-if="student.user.avatar" class="w-14 h-14 rounded-full shadow-inner overflow-hidden border-2 border-base-200">
+                    <img :src="'/storage/' + student.user.avatar" :alt="student.user.full_name" class="w-full h-full object-cover" />
+                </div>
+                <div v-else class="bg-primary text-primary-content rounded-full w-14 h-14 shadow-inner font-bold text-xl flex items-center justify-center">
+                    <span>{{ student.user.full_name.charAt(0).toUpperCase() }}</span>
+                </div>
+            </div>
+            <div>
+                <h1 class="text-3xl font-black text-base-content tracking-tight uppercase">Edit Profil Siswa</h1>
+                <div class="badge badge-lg badge-outline opacity-50 mt-1">{{ student.user.full_name }}</div>
+            </div>
         </div>
 
         <div class="card bg-base-100 shadow-xl max-w-2xl border border-base-200">
@@ -50,7 +61,6 @@ const submit = () => {
                         v-model="form.student_number"
                         :error="form.errors.student_number"
                         placeholder="Contoh: 2425..."
-                        required
                     />
 
                     <SelectInput 

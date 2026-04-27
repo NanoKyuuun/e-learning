@@ -4,14 +4,11 @@ import { Link } from '@inertiajs/vue3';
 import { 
     LayoutDashboard, 
     Users, 
-    ShieldCheck, 
     Calendar, 
     BookOpen, 
-    RotateCcw, 
-    History, 
-    Settings,
     Building2,
-    Camera
+    Camera,
+    Bell
 } from 'lucide-vue-next';
 </script>
 
@@ -22,6 +19,11 @@ import {
             <li>
                 <Link :href="route('admin.dashboard')" :class="{ 'active bg-primary/10 text-primary font-bold': $page.url === '/admin/dashboard' }">
                     <LayoutDashboard class="w-5 h-5"/> Dashboard
+                </Link>
+            </li>
+            <li>
+                <Link :href="route('announcements.index')" :class="{ 'active bg-primary/10 text-primary font-bold': $page.url === '/announcements' }">
+                    <Bell class="w-5 h-5"/> Pengumuman
                 </Link>
             </li>
             <li>
@@ -53,12 +55,6 @@ import {
                     <Camera class="w-5 h-5"/> Kelola Wajah Siswa
                 </Link>
             </li>
-
-            <li class="menu-title uppercase text-[10px] font-black opacity-40 tracking-widest mt-6 mb-2">Keamanan & Sistem</li>
-            <li><Link href="#"><ShieldCheck class="w-5 h-5"/> Role & Permission</Link></li>
-            <li><Link href="#"><RotateCcw class="w-5 h-5"/> Reset Password</Link></li>
-            <li><Link href="#"><History class="w-5 h-5"/> Log Aktivitas</Link></li>
-            <li><Link href="#"><Settings class="w-5 h-5"/> Pengaturan Sistem</Link></li>
         </template>
         <slot />
     </AppLayout>

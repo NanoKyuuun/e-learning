@@ -8,6 +8,7 @@ use App\Http\Controllers\Kajur\TeachingAssignmentController;
 use App\Http\Controllers\Kajur\MonitoringController;
 use App\Http\Controllers\Kajur\DashboardController;
 use App\Http\Controllers\Kajur\ClassScheduleController;
+use App\Http\Controllers\Kajur\AnnouncementController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'role:kajur'])->prefix('kajur')->name('kajur.')->group(function () {
@@ -15,6 +16,7 @@ Route::middleware(['auth', 'role:kajur'])->prefix('kajur')->name('kajur.')->grou
 
     Route::resource('subjects', SubjectController::class);
     Route::resource('class-groups', ClassGroupController::class);
+    Route::resource('announcements', AnnouncementController::class);
     
     // Anggota Kelas
     Route::get('class-groups/{class_group}/members', [ClassEnrollmentController::class, 'index'])->name('class-groups.members.index');

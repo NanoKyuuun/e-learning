@@ -67,12 +67,9 @@ class UserService
         }
 
         if (in_array('siswa', $roles)) {
-            // Untuk siswa, kita butuh student_number minimal. 
-            // Karena ini auto-create dari Admin User Management, kita buat dummy dulu atau biarkan kosong.
-            // Sesuai flow, Kajur nanti yang melengkapi detailnya.
+            // student_number (NIS) nullable — Kajur yang akan mengisi sesuai data resmi.
             Student::firstOrCreate(
-                ['user_id' => $user->id],
-                ['student_number' => 'REG-' . strtoupper(substr($user->id, 0, 8))]
+                ['user_id' => $user->id]
             );
         }
     }

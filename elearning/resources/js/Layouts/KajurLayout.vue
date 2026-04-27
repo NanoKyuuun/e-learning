@@ -11,7 +11,9 @@ import {
     FileText,
     GraduationCap,
     UsersRound,
-    UserCheck
+    UserCheck,
+    Bell,
+    Megaphone
 } from 'lucide-vue-next';
 </script>
 
@@ -22,6 +24,18 @@ import {
             <li>
                 <Link :href="route('kajur.dashboard')" :class="{ 'active bg-primary/10 text-primary font-bold': $page.url === '/kajur/dashboard' }">
                     <LayoutDashboard class="w-5 h-5"/> Dashboard
+                </Link>
+            </li>
+
+            <li class="menu-title uppercase text-[10px] font-black opacity-40 tracking-widest mt-6 mb-2">Pengumuman</li>
+            <li>
+                <Link :href="route('kajur.announcements.index')" :class="{ 'active bg-primary/10 text-primary font-bold': $page.url.startsWith('/kajur/announcements') }">
+                    <Megaphone class="w-5 h-5"/> Kelola Pengumuman
+                </Link>
+            </li>
+            <li>
+                <Link :href="route('announcements.index')" :class="{ 'active bg-primary/10 text-primary font-bold': $page.url === '/announcements' }">
+                    <Bell class="w-5 h-5"/> Lihat Pengumuman
                 </Link>
             </li>
             <li>

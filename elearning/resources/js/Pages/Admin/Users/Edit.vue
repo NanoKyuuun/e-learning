@@ -34,8 +34,19 @@ const submit = () => {
 
     <AdminLayout>
         <div class="mb-8 flex items-center gap-4">
-            <h1 class="text-3xl font-bold text-base-content">Edit User</h1>
-            <div class="badge badge-lg badge-outline opacity-50">{{ user.full_name }}</div>
+            <!-- Avatar -->
+            <div class="avatar" :class="user.avatar ? '' : 'placeholder'">
+                <div v-if="user.avatar" class="w-14 h-14 rounded-full shadow-inner overflow-hidden border-2 border-base-200">
+                    <img :src="'/storage/' + user.avatar" :alt="user.full_name" class="w-full h-full object-cover" />
+                </div>
+                <div v-else class="bg-primary text-primary-content rounded-full w-14 h-14 shadow-inner font-bold text-xl flex items-center justify-center">
+                    <span>{{ user.full_name.charAt(0).toUpperCase() }}</span>
+                </div>
+            </div>
+            <div>
+                <h1 class="text-3xl font-bold text-base-content">Edit User</h1>
+                <div class="badge badge-lg badge-outline opacity-50 mt-1">{{ user.full_name }}</div>
+            </div>
         </div>
 
         <div class="card bg-base-100 shadow-xl max-w-4xl">

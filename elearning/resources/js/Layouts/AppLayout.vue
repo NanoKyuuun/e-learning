@@ -38,8 +38,16 @@ const logout = () => {
                 <!-- User Profile Dropdown -->
                 <div class="dropdown dropdown-end">
                     <div tabindex="0" role="button" class="btn btn-ghost flex items-center gap-2 px-2 hover:bg-base-200 rounded-lg transition-colors">
-                        <div class="avatar placeholder">
-                            <div class="bg-primary text-primary-content rounded-full w-9 shadow-inner font-bold">
+                        <!-- Avatar: foto jika ada, fallback inisial -->
+                        <div class="avatar" :class="$page.props.auth.user.avatar ? '' : 'placeholder'">
+                            <div v-if="$page.props.auth.user.avatar"
+                                 class="w-9 rounded-full shadow-inner overflow-hidden">
+                                <img :src="'/storage/' + $page.props.auth.user.avatar"
+                                     :alt="$page.props.auth.user.full_name"
+                                     class="w-full h-full object-cover" />
+                            </div>
+                            <div v-else
+                                 class="bg-primary text-primary-content rounded-full w-9 shadow-inner font-bold">
                                 <span>{{ $page.props.auth.user.full_name.charAt(0) }}</span>
                             </div>
                         </div>

@@ -95,10 +95,20 @@ const clearSearch = () => {
                         <tr v-for="(user, index) in users.data" :key="user.id" class="hover">
                             <td class="font-mono text-xs opacity-50">{{ (users.current_page - 1) * users.per_page + index + 1 }}</td>
                             <td>
-                                <div class="flex flex-col">
-                                    <span class="font-bold text-base-content">{{ user.full_name }}</span>
-                                    <span class="text-xs opacity-60 italic">{{ user.email }}</span>
-                                    <span v-if="user.username" class="text-[10px] uppercase font-black tracking-wider opacity-40">@{{ user.username }}</span>
+                                <div class="flex items-center gap-3">
+                                    <div class="avatar" :class="user.avatar ? '' : 'placeholder'">
+                                        <div v-if="user.avatar" class="w-10 h-10 rounded-full shadow-inner overflow-hidden border border-base-200">
+                                            <img :src="'/storage/' + user.avatar" :alt="user.full_name" class="w-full h-full object-cover" />
+                                        </div>
+                                        <div v-else class="bg-neutral text-neutral-content rounded-full w-10 h-10 flex items-center justify-center font-bold">
+                                            <span>{{ user.full_name.charAt(0).toUpperCase() }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="font-bold text-base-content">{{ user.full_name }}</span>
+                                        <span class="text-xs opacity-60 italic">{{ user.email }}</span>
+                                        <span v-if="user.username" class="text-[10px] uppercase font-black tracking-wider opacity-40">@{{ user.username }}</span>
+                                    </div>
                                 </div>
                             </td>
                             <td>

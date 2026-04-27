@@ -35,10 +35,10 @@ class StudentController extends Controller
     public function update(Request $request, Student $student)
     {
         $validated = $request->validate([
-            'student_number' => ['required', 'string', 'max:50', 'unique:students,student_number,' . $student->id],
-            'phone' => ['nullable', 'string', 'max:30'],
-            'gender' => ['nullable', 'in:laki-laki,perempuan'],
-            'is_active' => ['required', 'boolean'],
+            'student_number' => ['nullable', 'string', 'max:50', 'unique:students,student_number,' . $student->id],
+            'phone'          => ['nullable', 'string', 'max:30'],
+            'gender'         => ['nullable', 'in:laki-laki,perempuan'],
+            'is_active'      => ['required', 'boolean'],
         ]);
 
         $this->studentService->updateStudent($student, $validated);

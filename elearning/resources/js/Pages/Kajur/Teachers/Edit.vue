@@ -32,8 +32,19 @@ const submit = () => {
 
     <KajurLayout>
         <div class="mb-8 flex items-center gap-4">
-            <h1 class="text-3xl font-black text-base-content tracking-tight uppercase">Edit Profil Guru</h1>
-            <div class="badge badge-lg badge-outline opacity-50">{{ teacher.user.full_name }}</div>
+            <!-- Avatar -->
+            <div class="avatar" :class="teacher.user.avatar ? '' : 'placeholder'">
+                <div v-if="teacher.user.avatar" class="w-14 h-14 rounded-full shadow-inner overflow-hidden border-2 border-base-200">
+                    <img :src="'/storage/' + teacher.user.avatar" :alt="teacher.user.full_name" class="w-full h-full object-cover" />
+                </div>
+                <div v-else class="bg-primary text-primary-content rounded-full w-14 h-14 shadow-inner font-bold text-xl flex items-center justify-center">
+                    <span>{{ teacher.user.full_name.charAt(0).toUpperCase() }}</span>
+                </div>
+            </div>
+            <div>
+                <h1 class="text-3xl font-black text-base-content tracking-tight uppercase">Edit Profil Guru</h1>
+                <div class="badge badge-lg badge-outline opacity-50 mt-1">{{ teacher.user.full_name }}</div>
+            </div>
         </div>
 
         <div class="card bg-base-100 shadow-xl max-w-2xl border border-base-200">

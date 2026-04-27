@@ -70,9 +70,12 @@ const clearSearch = () => {
                             <td>{{ (teachers.current_page - 1) * teachers.per_page + index + 1 }}</td>
                             <td>
                                 <div class="flex items-center gap-3">
-                                    <div class="avatar placeholder">
-                                        <div class="bg-neutral text-neutral-content rounded-full w-8">
-                                            <span>{{ teacher.user.full_name.charAt(0) }}</span>
+                                    <div class="avatar" :class="teacher.user.avatar ? '' : 'placeholder'">
+                                        <div v-if="teacher.user.avatar" class="w-8 h-8 rounded-full shadow-inner overflow-hidden border border-base-200">
+                                            <img :src="'/storage/' + teacher.user.avatar" :alt="teacher.user.full_name" class="w-full h-full object-cover" />
+                                        </div>
+                                        <div v-else class="bg-neutral text-neutral-content rounded-full w-8 h-8 flex items-center justify-center font-bold">
+                                            <span>{{ teacher.user.full_name.charAt(0).toUpperCase() }}</span>
                                         </div>
                                     </div>
                                     <div class="font-bold text-base-content">{{ teacher.user.full_name }}</div>

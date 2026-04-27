@@ -9,7 +9,8 @@ import {
     FileText, 
     ClipboardCheck, 
     Award, 
-    User 
+    User,
+    Bell
 } from 'lucide-vue-next';
 </script>
 
@@ -20,6 +21,11 @@ import {
             <li>
                 <Link :href="route('siswa.dashboard')" :class="{ 'active bg-primary/10 text-primary font-bold': $page.url === '/siswa/dashboard' }">
                     <LayoutDashboard class="w-5 h-5"/> Dashboard
+                </Link>
+            </li>
+            <li>
+                <Link :href="route('announcements.index')" :class="{ 'active bg-primary/10 text-primary font-bold': $page.url === '/announcements' }">
+                    <Bell class="w-5 h-5"/> Pengumuman
                 </Link>
             </li>
             

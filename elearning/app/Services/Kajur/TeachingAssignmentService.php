@@ -6,16 +6,31 @@ use App\Models\TeachingAssignment;
 
 class TeachingAssignmentService
 {
+    public function __construct(
+        private readonly KajurDepartmentService $departmentService
+    ) {}
+
     public function getAllAssignments($search = null)
     {
+        $departmentIds = $this->departmentService->getManagedDepartmentIds();
+
         return TeachingAssignment::with(['teacher.user', 'classGroup', 'subject', 'semester.academicYear'])
+            ->when($departmentIds === [], function ($query) {
+                $query->whereRaw('1 = 0');
+            }, function ($query) use ($departmentIds) {
+                $query->whereHas('classGroup', function ($classGroupQuery) use ($departmentIds) {
+                    $classGroupQuery->whereIn('department_id', $departmentIds);
+                });
+            })
             ->when($search, function ($query, $search) {
-                $query->whereHas('teacher.user', function($q) use ($search) {
-                    $q->where('full_name', 'like', "%{$search}%");
-                })->orWhereHas('classGroup', function($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%");
-                })->orWhereHas('subject', function($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%");
+                $query->where(function ($searchQuery) use ($search) {
+                    $searchQuery->whereHas('teacher.user', function ($teacherQuery) use ($search) {
+                        $teacherQuery->where('full_name', 'like', "%{$search}%");
+                    })->orWhereHas('classGroup', function ($classGroupQuery) use ($search) {
+                        $classGroupQuery->where('name', 'like', "%{$search}%");
+                    })->orWhereHas('subject', function ($subjectQuery) use ($search) {
+                        $subjectQuery->where('name', 'like', "%{$search}%");
+                    });
                 });
             })
             ->latest()

@@ -1,0 +1,13 @@
+venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.env
+.git
+.gitignore
+app.zip
+run.bat
+setup.bat
+reference_images
+storage

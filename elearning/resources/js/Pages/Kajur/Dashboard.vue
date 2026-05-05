@@ -5,6 +5,8 @@ import { School, Book, UserPlus, GraduationCap, ArrowRight, UserCheck, Users } f
 
 defineProps({
     stats: Object,
+    managedDepartments: Array,
+    error: String,
 });
 </script>
 
@@ -15,6 +17,23 @@ defineProps({
         <div class="mb-8">
             <h1 class="text-3xl font-black text-base-content tracking-tight uppercase">Dashboard Kajur</h1>
             <p class="text-base-content/60 italic text-sm">Selamat datang, Kepala Jurusan. Kelola operasional akademik di sini.</p>
+        </div>
+
+        <div v-if="error" class="alert alert-warning mb-6 border-none bg-warning/10 text-warning-content/90">
+            <span>{{ error }}</span>
+        </div>
+
+        <div v-else-if="managedDepartments?.length" class="mb-8 rounded-3xl border border-base-200 bg-base-100 p-6 shadow-sm">
+            <p class="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">Jurusan Yang Dikelola</p>
+            <div class="mt-4 flex flex-wrap gap-2">
+                <span
+                    v-for="department in managedDepartments"
+                    :key="department.id"
+                    class="badge badge-primary badge-lg font-bold"
+                >
+                    {{ department.name }} ({{ department.code }})
+                </span>
+            </div>
         </div>
 
         <!-- Quick Stats -->

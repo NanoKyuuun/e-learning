@@ -34,16 +34,18 @@ class FaceAttendanceController extends Controller
         // ─── Validasi 1: Siswa harus punya profil ─────────────────────────
         if (! $student) {
             return response()->json([
-                'success' => false,
-                'message' => 'Profil siswa tidak ditemukan. Hubungi admin.',
+                'success'    => false,
+                'error_code' => 'STUDENT_PROFILE_NOT_FOUND',
+                'message'    => 'Profil siswa tidak ditemukan. Hubungi admin.',
             ], 422);
         }
 
         // ─── Validasi 2: Meeting harus aktif ──────────────────────────────
         if (! $meeting->isAttendanceOpen()) {
             return response()->json([
-                'success' => false,
-                'message' => 'Absensi belum dibuka atau sudah ditutup untuk pertemuan ini.',
+                'success'    => false,
+                'error_code' => 'ATTENDANCE_CLOSED',
+                'message'    => 'Absensi belum dibuka atau sudah ditutup untuk pertemuan ini.',
             ], 422);
         }
 
@@ -55,9 +57,17 @@ class FaceAttendanceController extends Controller
             ->exists();
 
         if (! $isEnrolled) {
+            Log::notice('[FaceAttendance] Absensi ditolak karena enrollment tidak aktif.', [
+                'meeting_id'      => $meeting->id,
+                'student_id'      => $student->id,
+                'class_group_id'  => $classGroupId,
+                'user_id'         => $user->id,
+            ]);
+
             return response()->json([
-                'success' => false,
-                'message' => 'Anda tidak terdaftar di kelas ini.',
+                'success'    => false,
+                'error_code' => 'STUDENT_NOT_ENROLLED_ACTIVE',
+                'message'    => 'Anda tidak terdaftar aktif di kelas ini.',
             ], 403);
         }
 
@@ -68,8 +78,9 @@ class FaceAttendanceController extends Controller
 
         if ($alreadyAttended) {
             return response()->json([
-                'success' => false,
-                'message' => 'Anda sudah melakukan absensi pada pertemuan ini.',
+                'success'    => false,
+                'error_code' => 'ATTENDANCE_ALREADY_RECORDED',
+                'message'    => 'Anda sudah melakukan absensi pada pertemuan ini.',
             ], 422);
         }
 
@@ -78,8 +89,9 @@ class FaceAttendanceController extends Controller
 
         if (! $faceProfile) {
             return response()->json([
-                'success' => false,
-                'message' => 'Data wajah Anda belum terdaftar. Hubungi admin atau guru.',
+                'success'    => false,
+                'error_code' => 'FACE_PROFILE_NOT_FOUND',
+                'message'    => 'Data wajah Anda belum terdaftar. Hubungi admin atau guru.',
             ], 422);
         }
 
@@ -93,8 +105,9 @@ class FaceAttendanceController extends Controller
             };
 
             return response()->json([
-                'success' => false,
-                'message' => $statusMsg,
+                'success'    => false,
+                'error_code' => 'FACE_PROFILE_NOT_READY',
+                'message'    => $statusMsg,
             ], 422);
         }
 
@@ -114,11 +127,21 @@ class FaceAttendanceController extends Controller
 
         // ─── Jika Python error teknis (koneksi dll) ────────────────────────
         if ($result['success'] === false && ($result['error_code'] ?? '') === 'CONNECTION_ERROR') {
-            $this->saveAttempt($meeting->id, $student->id, $user->id, false, 'PYTHON_CONNECTION_ERROR', $result, $metadata);
+            $this->saveAttempt(
+                $meeting->id,
+                $student->id,
+                $user->id,
+                false,
+                'PYTHON_CONNECTION_ERROR',
+                null,
+                null,
+                $metadata
+            );
 
             return response()->json([
-                'success' => false,
-                'message' => 'Layanan pengenalan wajah sedang tidak tersedia. Coba beberapa saat lagi.',
+                'success'    => false,
+                'error_code' => 'PYTHON_CONNECTION_ERROR',
+                'message'    => 'Layanan pengenalan wajah sedang tidak tersedia. Coba beberapa saat lagi.',
             ], 503);
         }
 
@@ -133,13 +156,15 @@ class FaceAttendanceController extends Controller
                 'NO_FACE_IN_ATTENDANCE_IMAGE'       => 'Tidak ada wajah terdeteksi. Pastikan wajah Anda terlihat jelas.',
                 'MULTIPLE_FACES_IN_ATTENDANCE_IMAGE' => 'Terdeteksi lebih dari satu wajah. Pastikan hanya Anda yang ada di kamera.',
                 'NO_PROFILE_FOUND'                  => 'Data wajah Anda tidak ditemukan di sistem. Hubungi admin.',
+                'UNAUTHORIZED'                     => 'Konfigurasi layanan pengenalan wajah ditolak server. Hubungi admin.',
                 default                             => 'Terjadi kesalahan saat memproses wajah. Coba lagi.',
             };
 
             return response()->json([
-                'success' => false,
-                'message' => $userMessage,
-            ], 422);
+                'success'    => false,
+                'error_code' => $reason,
+                'message'    => $userMessage,
+            ], ($result['http_status'] ?? null) === 401 ? 502 : 422);
         }
 
         // ─── Python sukses proses: cek verified ───────────────────────────
@@ -151,10 +176,11 @@ class FaceAttendanceController extends Controller
             $this->saveAttempt($meeting->id, $student->id, $user->id, false, 'FACE_NOT_MATCH', $distance, $faceCount, $metadata);
 
             return response()->json([
-                'success'  => false,
-                'verified' => false,
-                'message'  => 'Wajah tidak cocok dengan akun Anda.',
-                'distance' => $distance,
+                'success'    => false,
+                'error_code' => 'FACE_NOT_MATCH',
+                'verified'   => false,
+                'message'    => 'Wajah tidak cocok dengan akun Anda.',
+                'distance'   => $distance,
             ], 422);
         }
 
@@ -193,8 +219,9 @@ class FaceAttendanceController extends Controller
             ]);
 
             return response()->json([
-                'success' => false,
-                'message' => 'Absensi berhasil diverifikasi tetapi gagal disimpan. Hubungi guru.',
+                'success'    => false,
+                'error_code' => 'ATTENDANCE_SAVE_FAILED',
+                'message'    => 'Absensi berhasil diverifikasi tetapi gagal disimpan. Hubungi guru.',
             ], 500);
         }
 

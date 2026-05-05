@@ -21,18 +21,17 @@ class TeachingAssignmentPolicy
         if ($user->hasRole('siswa')) {
             return $user->student && $user->student->enrollments()
                 ->where('class_group_id', $teachingAssignment->class_group_id)
+                ->where('status', 'active')
                 ->exists();
         }
 
         // Kajur hanya bisa melihat pengampu di jurusannya
         if ($user->hasRole('kajur')) {
-            // Cek lewat penugasan kajur
-            $isHead = \App\Models\DepartmentHeadAssignment::where('user_id', $user->id)
-                ->where('department_id', $teachingAssignment->classGroup->department_id)
+            $departmentIds = \App\Models\DepartmentHeadAssignment::where('user_id', $user->id)
                 ->where('is_active', true)
-                ->exists();
-            
-            return $isHead;
+                ->pluck('department_id');
+
+            return $departmentIds->contains($teachingAssignment->classGroup->department_id);
         }
 
         // Admin bisa melihat semuanya

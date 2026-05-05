@@ -53,9 +53,12 @@ RUN mkdir -p /var/www/html/storage/framework/cache/data \
 # Copy Nginx & Supervisor config
 COPY docker/nginx.conf /etc/nginx/nginx.conf
 COPY docker/supervisord.conf /etc/supervisord.conf
+COPY docker/php/uploads.ini /usr/local/etc/php/conf.d/uploads.ini
+COPY docker/start-container.sh /usr/local/bin/start-container.sh
+RUN chmod +x /usr/local/bin/start-container.sh
 
 # Expose port 80
 EXPOSE 80
 
-# Start via Supervisor
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
+# Start application
+CMD ["/usr/local/bin/start-container.sh"]

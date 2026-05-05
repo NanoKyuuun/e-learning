@@ -41,8 +41,14 @@ defineProps({
             <div class="bg-base-200 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
                 <School class="w-10 h-10 opacity-20" />
             </div>
-            <h3 class="text-xl font-black text-base-content opacity-60 uppercase tracking-widest">Belum Terdaftar di Kelas</h3>
-            <p class="opacity-40 text-sm italic mt-2">Mata pelajaran akan muncul setelah kamu dimasukkan ke dalam kelas oleh Kajur.</p>
+            <h3 class="text-xl font-black text-base-content opacity-60 uppercase tracking-widest">
+                {{ classGroup ? 'Belum Ada Mapel Aktif' : 'Belum Terdaftar di Kelas' }}
+            </h3>
+            <p class="opacity-40 text-sm italic mt-2">
+                {{ classGroup
+                    ? 'Pengampu untuk kelas dan semester aktif belum disiapkan oleh Kajur atau guru.'
+                    : 'Mata pelajaran akan muncul setelah kamu dimasukkan ke dalam kelas oleh Kajur.' }}
+            </p>
         </div>
     </SiswaLayout>
 </template>

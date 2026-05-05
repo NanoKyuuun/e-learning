@@ -9,6 +9,11 @@ class MaterialPolicy
 {
     public function view(User $user, Material $material): bool
     {
+        if ($user->hasRole('siswa')) {
+            return $material->published_at !== null
+                && (new MeetingPolicy())->view($user, $material->meeting);
+        }
+
         return (new MeetingPolicy())->view($user, $material->meeting);
     }
 

@@ -16,7 +16,12 @@ class MeetingPolicy
 
         // Siswa hanya bisa lihat jika dia terdaftar di kelas tersebut
         if ($user->hasRole('siswa')) {
-            return $user->student && $user->student->enrollments()->where('class_group_id', $meeting->teachingAssignment->class_group_id)->exists();
+            return $user->student
+                && in_array($meeting->status, ['published', 'active', 'completed', 'closed'], true)
+                && $user->student->enrollments()
+                    ->where('class_group_id', $meeting->teachingAssignment->class_group_id)
+                    ->where('status', 'active')
+                    ->exists();
         }
 
         // Admin
@@ -26,11 +31,11 @@ class MeetingPolicy
 
         // Kajur
         if ($user->hasRole('kajur')) {
-            $assignment = \App\Models\DepartmentHeadAssignment::where('user_id', $user->id)
+            $departmentIds = \App\Models\DepartmentHeadAssignment::where('user_id', $user->id)
                 ->where('is_active', true)
-                ->first();
-            
-            return $assignment && $assignment->department_id === $meeting->teachingAssignment->classGroup->department_id;
+                ->pluck('department_id');
+
+            return $departmentIds->contains($meeting->teachingAssignment->classGroup->department_id);
         }
 
         return false;

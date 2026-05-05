@@ -53,4 +53,21 @@ class User extends Authenticatable
     {
         return $this->hasOne(Student::class, 'user_id');
     }
+
+    /**
+     * Relationship to kajur department assignments.
+     */
+    public function departmentHeadAssignments()
+    {
+        return $this->hasMany(DepartmentHeadAssignment::class, 'user_id');
+    }
+
+    /**
+     * Active kajur department assignments.
+     */
+    public function activeDepartmentHeadAssignments()
+    {
+        return $this->hasMany(DepartmentHeadAssignment::class, 'user_id')
+            ->where('is_active', true);
+    }
 }

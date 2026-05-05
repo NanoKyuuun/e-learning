@@ -9,7 +9,11 @@ class AssignmentPolicy
 {
     public function view(User $user, Assignment $assignment): bool
     {
-        // Delegasikan ke policy meeting karena tugas bagian dari meeting
+        if ($user->hasRole('siswa')) {
+            return $assignment->status === 'published'
+                && (new MeetingPolicy())->view($user, $assignment->meeting);
+        }
+
         return (new MeetingPolicy())->view($user, $assignment->meeting);
     }
 

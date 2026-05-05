@@ -16,6 +16,7 @@ const meetingBadge = (meeting) => {
     const status = meeting.status;
     if (status === 'active')    return { label: 'Absensi Terbuka', cls: 'badge-success animate-pulse' };
     if (status === 'published') return { label: 'Sedang Berlangsung', cls: 'badge-info' };
+    if (status === 'completed' || status === 'closed') return { label: 'Selesai', cls: 'badge-neutral' };
     if (status === 'draft')     return { label: 'Draft', cls: 'badge-ghost' };
     return { label: status, cls: 'badge-ghost' };
 };

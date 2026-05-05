@@ -118,6 +118,10 @@ const clearSearch = () => {
                                     </span>
                                     <span v-if="user.roles.length === 0" class="badge badge-sm badge-ghost opacity-50 italic text-[10px]">No Role Assigned</span>
                                 </div>
+                                <div v-if="user.active_department_head_assignments?.length" class="mt-2 text-[10px] font-bold uppercase tracking-wider opacity-50">
+                                    Jurusan Kajur:
+                                    {{ user.active_department_head_assignments.map(item => item.department?.name).filter(Boolean).join(', ') }}
+                                </div>
                             </td>
                             <td>
                                 <div :class="['badge badge-sm font-bold', user.status === 'active' ? 'badge-success bg-success/10 text-success border-none' : 'badge-error bg-error/10 text-error border-none']">

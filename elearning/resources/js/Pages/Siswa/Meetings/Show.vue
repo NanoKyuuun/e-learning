@@ -13,6 +13,7 @@ const props = defineProps({
     meeting:           Object,
     myAttendance:      Object,
     faceProfileStatus: Object,
+    isEnrolledForAttendance: Boolean,
     isAttendanceOpen:  Boolean,
 });
 
@@ -31,6 +32,7 @@ const attendanceForm = useForm({ image: null });
 // ─── Computed ────────────────────────────────────────────────────────────────
 const canAttend = computed(() => {
     return props.isAttendanceOpen
+        && props.isEnrolledForAttendance
         && !props.myAttendance
         && props.faceProfileStatus?.is_ready;
 });
@@ -38,6 +40,7 @@ const canAttend = computed(() => {
 const attendanceBlockReason = computed(() => {
     if (props.myAttendance)             return 'Anda sudah melakukan absensi.';
     if (!props.isAttendanceOpen)        return 'Absensi belum dibuka oleh guru.';
+    if (!props.isEnrolledForAttendance) return 'Anda tidak terdaftar aktif di kelas ini.';
     if (!props.faceProfileStatus?.exists) return 'Wajah Anda belum terdaftar. Hubungi admin/guru.';
     if (!props.faceProfileStatus?.is_active) return 'Data wajah Anda dinonaktifkan. Hubungi admin.';
     const s = props.faceProfileStatus?.sync_status;

@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreUserRequest extends FormRequest
 {
@@ -21,6 +22,11 @@ class StoreUserRequest extends FormRequest
             'status' => ['required', 'in:active,inactive'],
             'roles' => ['required', 'array'],
             'roles.*' => ['string', 'exists:roles,name'],
+            'kajur_department_id' => [
+                'nullable',
+                'exists:departments,id',
+                Rule::requiredIf(fn () => in_array('kajur', $this->input('roles', []), true)),
+            ],
         ];
     }
 }

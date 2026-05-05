@@ -3,9 +3,11 @@ import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import TextInput from '@/Components/forms/input/TextInput.vue';
 import SelectInput from '@/Components/forms/input/SelectInput.vue';
+import { computed, watch } from 'vue';
 
 const props = defineProps({
     roles: Array,
+    departments: Array,
 });
 
 const form = useForm({
@@ -16,12 +18,26 @@ const form = useForm({
     password_confirmation: '',
     status: 'active',
     roles: [],
+    kajur_department_id: '',
 });
 
 const statusOptions = [
     { value: 'active', label: 'Aktif' },
     { value: 'inactive', label: 'Tidak Aktif' },
 ];
+
+const departmentOptions = props.departments.map((department) => ({
+    value: department.id,
+    label: `${department.name} (${department.code})`,
+}));
+
+const showKajurDepartmentField = computed(() => form.roles.includes('kajur'));
+
+watch(showKajurDepartmentField, (visible) => {
+    if (!visible) {
+        form.kajur_department_id = '';
+    }
+});
 
 const submit = () => {
     form.post(route('admin.users.store'));
@@ -99,6 +115,15 @@ const submit = () => {
                             <span class="label-text-alt text-error">{{ form.errors.roles }}</span>
                         </label>
                     </div>
+
+                    <SelectInput
+                        v-if="showKajurDepartmentField"
+                        label="Jurusan Kajur"
+                        v-model="form.kajur_department_id"
+                        :options="departmentOptions"
+                        :error="form.errors.kajur_department_id"
+                        required
+                    />
 
                     <div class="flex justify-end gap-4 mt-8 pt-6 border-t border-base-200">
                         <Link :href="route('admin.users.index')" class="btn btn-ghost">Batal</Link>

@@ -1,7 +1,7 @@
 services:
   app:
     build:
-      context: .
+      context: ./elearning
       dockerfile: Dockerfile
     container_name: elearning-app
     restart: unless-stopped
@@ -11,7 +11,7 @@ services:
       face-api:
         condition: service_started
     env_file:
-      - ./.env
+      - ./elearning/.env
     environment:
       APP_ENV: production
       APP_DEBUG: "false"
@@ -30,13 +30,13 @@ services:
     ports:
       - "8085:80"
     volumes:
-      - ./storage:/var/www/html/storage
+      - ./elearning/storage:/var/www/html/storage
     networks:
       - elearning-network
 
   face-api:
     build:
-      context: ../face_recognition
+      context: ./face_recognition
       dockerfile: Dockerfile
     container_name: elearning-face-api
     restart: unless-stopped
@@ -48,7 +48,7 @@ services:
       ALLOWED_ORIGINS: http://localhost:8085,http://127.0.0.1:8085
       MAX_CONTENT_LENGTH: 10485760
     volumes:
-      - ../face_recognition/storage:/app/storage
+      - ./face_recognition/storage:/app/storage
     networks:
       - elearning-network
 

@@ -3,29 +3,17 @@
 use App\Http\Controllers\Siswa\AssignmentSubmissionController;
 use App\Http\Controllers\Siswa\ClassController;
 use App\Http\Controllers\Siswa\FaceAttendanceController;
+use App\Services\Siswa\StudentAcademicService;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->name('siswa.')->group(function () {
-    Route::get('/dashboard', function () {
+    Route::get('/dashboard', function (StudentAcademicService $studentAcademicService) {
         $student = auth()->user()->student;
         if (!$student) return Inertia::render('Siswa/Dashboard', ['stats' => ['subjects_count' => 0, 'pending_assignments' => 0]]);
 
-        // Dapatkan kelas aktif siswa
-        $enrollment = \App\Models\StudentClassEnrollment::where('student_id', $student->id)->where('status', 'active')->first();
-        $subjectsCount = $enrollment ? \App\Models\TeachingAssignment::where('class_group_id', $enrollment->class_group_id)->count() : 0;
-
-        // Ambil 5 tugas yang belum dikerjakan
-        $pendingAssignments = \App\Models\Assignment::whereHas('meeting.teachingAssignment', function($q) use ($enrollment) {
-            $q->where('class_group_id', $enrollment?->class_group_id);
-        })
-        ->whereDoesntHave('submissions', function($q) use ($student) {
-            $q->where('student_id', $student->id);
-        })
-        ->where('due_at', '>', now())
-        ->orderBy('due_at')
-        ->take(5)
-        ->get();
+        $subjectsCount = $studentAcademicService->getCurrentTeachingAssignments($student)->count();
+        $pendingAssignments = $studentAcademicService->getPendingAssignments($student);
 
         return Inertia::render('Siswa/Dashboard', [
             'stats' => [

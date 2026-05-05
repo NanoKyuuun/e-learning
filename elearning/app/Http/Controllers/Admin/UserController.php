@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreUserRequest;
 use App\Http\Requests\Admin\UpdateUserRequest;
+use App\Models\Department;
 use App\Models\User;
 use App\Services\Admin\UserService;
 use Illuminate\Http\Request;
@@ -24,7 +25,7 @@ class UserController extends Controller
     {
         $search = $request->input('search');
         
-        $users = User::with('roles')
+        $users = User::with(['roles', 'activeDepartmentHeadAssignments.department'])
             ->when($search, function ($query, $search) {
                 $query->where('full_name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%")
@@ -44,6 +45,7 @@ class UserController extends Controller
     {
         return Inertia::render('Admin/Users/Create', [
             'roles' => Role::all(),
+            'departments' => Department::where('is_active', true)->orderBy('name')->get(),
         ]);
     }
 
@@ -57,9 +59,13 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
+        $user->load(['roles', 'activeDepartmentHeadAssignments.department']);
+
         return Inertia::render('Admin/Users/Edit', [
-            'user' => $user->load('roles'),
+            'user' => $user,
             'roles' => Role::all(),
+            'departments' => Department::where('is_active', true)->orderBy('name')->get(),
+            'kajurDepartmentId' => optional($user->activeDepartmentHeadAssignments->first())->department_id,
         ]);
     }
 

@@ -13,22 +13,28 @@ class ClassEnrollmentService
     {
         return StudentClassEnrollment::with('student.user')
             ->where('class_group_id', $classGroup->id)
+            ->where('status', 'active')
+            ->orderByDesc('enrolled_at')
             ->get();
     }
 
-    public function getAvailableStudents($search = null)
+    public function getAvailableStudents(ClassGroup $classGroup, $search = null)
     {
-        // Cari siswa yang belum terdaftar di kelas aktif pada tahun ajaran ini
-        // Untuk kesederhanaan, kita cari yang belum punya enrollment 'active' sama sekali
         return Student::with('user')
-            ->whereDoesntHave('enrollments', function($query) {
-                $query->where('status', 'active');
+            ->whereDoesntHave('enrollments', function ($query) use ($classGroup) {
+                $query->where('status', 'active')
+                    ->whereHas('classGroup', function ($classGroupQuery) use ($classGroup) {
+                        $classGroupQuery->where('academic_year_id', $classGroup->academic_year_id);
+                    });
             })
-            ->when($search, function($query, $search) {
-                $query->whereHas('user', function($q) use ($search) {
-                    $q->where('full_name', 'like', "%{$search}%");
-                })->orWhere('student_number', 'like', "%{$search}%");
+            ->when($search, function ($query, $search) {
+                $query->where(function ($searchQuery) use ($search) {
+                    $searchQuery->whereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('full_name', 'like', "%{$search}%");
+                    })->orWhere('student_number', 'like', "%{$search}%");
+                });
             })
+            ->orderBy('student_number')
             ->get();
     }
 
@@ -36,6 +42,16 @@ class ClassEnrollmentService
     {
         return DB::transaction(function () use ($classGroup, $studentIds) {
             foreach ($studentIds as $studentId) {
+                StudentClassEnrollment::where('student_id', $studentId)
+                    ->where('status', 'active')
+                    ->whereHas('classGroup', function ($query) use ($classGroup) {
+                        $query->where('academic_year_id', $classGroup->academic_year_id)
+                            ->where('id', '!=', $classGroup->id);
+                    })
+                    ->update([
+                        'status' => 'inactive',
+                    ]);
+
                 StudentClassEnrollment::updateOrCreate(
                     [
                         'student_id' => $studentId,
@@ -44,6 +60,7 @@ class ClassEnrollmentService
                     [
                         'enrolled_at' => now(),
                         'status' => 'active',
+                        'notes' => null,
                     ]
                 );
             }
@@ -52,6 +69,8 @@ class ClassEnrollmentService
 
     public function removeStudent(StudentClassEnrollment $enrollment)
     {
-        return $enrollment->delete();
+        return $enrollment->update([
+            'status' => 'inactive',
+        ]);
     }
 }

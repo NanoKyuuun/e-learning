@@ -8,6 +8,8 @@ use App\Models\Meeting;
 use App\Models\StudentClassEnrollment;
 use App\Models\TeachingAssignment;
 use App\Models\Assignment;
+use App\Services\Shared\AcademicService;
+use App\Services\Siswa\StudentAcademicService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -16,10 +18,15 @@ class ClassController extends Controller
 {
     use AuthorizesRequests;
 
+    public function __construct(
+        private readonly StudentAcademicService $studentAcademicService,
+        private readonly AcademicService $academicService
+    ) {}
+
     public function index()
     {
         $student = auth()->user()->student;
-        
+
         if (!$student) {
             return Inertia::render('Siswa/Subjects/Index', [
                 'subjects'   => [],
@@ -27,10 +34,7 @@ class ClassController extends Controller
             ]);
         }
 
-        $enrollment = StudentClassEnrollment::with(['classGroup.academicYear'])
-            ->where('student_id', $student->id)
-            ->where('status', 'active')
-            ->first();
+        $enrollment = $this->studentAcademicService->getActiveEnrollment($student);
 
         if (!$enrollment) {
             return Inertia::render('Siswa/Subjects/Index', [
@@ -39,13 +43,8 @@ class ClassController extends Controller
             ]);
         }
 
-        $subjects = TeachingAssignment::with(['subject', 'teacher.user'])
-            ->where('class_group_id', $enrollment->class_group_id)
-            ->where('is_active', true)
-            ->get();
-
         return Inertia::render('Siswa/Subjects/Index', [
-            'subjects'   => $subjects,
+            'subjects'   => $this->studentAcademicService->getCurrentTeachingAssignments($student),
             'classGroup' => $enrollment->classGroup,
         ]);
     }
@@ -57,8 +56,7 @@ class ClassController extends Controller
         return Inertia::render('Siswa/Meetings/Index', [
             'teachingAssignment' => $teachingAssignment->load(['subject', 'teacher.user', 'classGroup']),
             'meetings'           => $teachingAssignment->meetings()
-                ->where('status', 'published')
-                ->orWhere('status', 'active')
+                ->whereIn('status', ['published', 'active', 'completed', 'closed'])
                 ->orderBy('meeting_number', 'asc')
                 ->get(),
         ]);
@@ -70,6 +68,12 @@ class ClassController extends Controller
 
         $student     = auth()->user()->student;
         $faceProfile = $student?->faceProfile;
+        $isEnrolledForAttendance = $student
+            ? $student->enrollments()
+                ->where('class_group_id', $meeting->teachingAssignment->class_group_id)
+                ->where('status', 'active')
+                ->exists()
+            : false;
 
         // Cek apakah siswa sudah absen di meeting ini
         $myAttendance = $student
@@ -82,8 +86,14 @@ class ClassController extends Controller
             'meeting' => $meeting->load([
                 'teachingAssignment.subject',
                 'teachingAssignment.teacher.user',
-                'materials',
-                'assignments',
+                'materials' => function ($query) {
+                    $query->whereNotNull('published_at')
+                        ->orderByDesc('published_at');
+                },
+                'assignments' => function ($query) {
+                    $query->where('status', 'published')
+                        ->orderBy('due_at');
+                },
             ]),
             // Status absensi siswa di meeting ini
             'myAttendance' => $myAttendance,
@@ -99,6 +109,7 @@ class ClassController extends Controller
                 'is_active'   => false,
                 'is_ready'    => false,
             ],
+            'isEnrolledForAttendance' => $isEnrolledForAttendance,
             // Apakah absensi sedang terbuka
             'isAttendanceOpen' => $meeting->isAttendanceOpen(),
         ]);
@@ -128,13 +139,13 @@ class ClassController extends Controller
         $student = auth()->user()->student;
         if (!$student) abort(403);
 
-        $enrollment = StudentClassEnrollment::where('student_id', $student->id)
-            ->where('status', 'active')
-            ->first();
+        $enrollment = $this->studentAcademicService->getActiveEnrollment($student);
 
         if (!$enrollment) {
             return Inertia::render('Siswa/Grades/Index', ['subjects' => []]);
         }
+
+        $activeSemester = $this->academicService->getActiveSemester();
 
         $subjects = TeachingAssignment::with([
             'subject',
@@ -143,6 +154,10 @@ class ClassController extends Controller
             }
         ])
         ->where('class_group_id', $enrollment->class_group_id)
+        ->where('is_active', true)
+        ->when($activeSemester, function ($query) use ($activeSemester) {
+            $query->where('semester_id', $activeSemester->id);
+        })
         ->get();
 
         return Inertia::render('Siswa/Grades/Index', [

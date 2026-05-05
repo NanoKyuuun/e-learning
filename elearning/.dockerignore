@@ -4,9 +4,17 @@ vendor
 .gitignore
 Dockerfile
 docker-compose.yml
+.env
 storage/*.key
 public/hot
 tests
 phpunit.xml
 .editorconfig
 .gitattributes
+app.zip
+storage/logs
+storage/framework/cache/data
+storage/framework/sessions
+storage/framework/testing
+storage/framework/views
+public/storage

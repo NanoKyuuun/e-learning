@@ -205,6 +205,13 @@ class FaceRecognitionService
      */
     private function parseResponse(Response $response): array
     {
+        if ($response->failed() && in_array($response->status(), [401, 403], true)) {
+            Log::warning('[FaceAPI] Request ditolak oleh Python API.', [
+                'status' => $response->status(),
+                'body'   => $response->body(),
+            ]);
+        }
+
         if ($response->failed() && $response->status() >= 500) {
             Log::warning('[FaceAPI] Server error dari Python.', [
                 'status' => $response->status(),
@@ -222,6 +229,7 @@ class FaceRecognitionService
             'verified'   => null,
             'distance'   => null,
             'face_count' => null,
+            'http_status'=> $response->status(),
         ], $data);
     }
 }

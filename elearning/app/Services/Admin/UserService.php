@@ -2,9 +2,10 @@
 
 namespace App\Services\Admin;
 
+use App\Models\DepartmentHeadAssignment;
+use App\Models\Student;
 use App\Models\User;
 use App\Models\Teacher;
-use App\Models\Student;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
@@ -31,6 +32,7 @@ class UserService
             if (isset($data['roles'])) {
                 $user->assignRole($data['roles']);
                 $this->createRelatedProfile($user, $data['roles']);
+                $this->syncKajurDepartmentAssignment($user, $data['roles'], $data['kajur_department_id'] ?? null);
             }
 
             return $user;
@@ -54,6 +56,7 @@ class UserService
             if (isset($data['roles'])) {
                 $user->syncRoles($data['roles']);
                 $this->createRelatedProfile($user, $data['roles']);
+                $this->syncKajurDepartmentAssignment($user, $data['roles'], $data['kajur_department_id'] ?? null);
             }
 
             return $user;
@@ -72,6 +75,60 @@ class UserService
                 ['user_id' => $user->id]
             );
         }
+    }
+
+    protected function syncKajurDepartmentAssignment(User $user, array $roles, ?string $departmentId): void
+    {
+        $activeAssignments = DepartmentHeadAssignment::where('user_id', $user->id)
+            ->where('is_active', true)
+            ->get();
+
+        if (! in_array('kajur', $roles, true)) {
+            foreach ($activeAssignments as $assignment) {
+                $assignment->update([
+                    'is_active' => false,
+                    'end_date'  => now()->toDateString(),
+                ]);
+            }
+
+            return;
+        }
+
+        foreach ($activeAssignments->where('department_id', '!=', $departmentId) as $assignment) {
+            $assignment->update([
+                'is_active' => false,
+                'end_date'  => now()->toDateString(),
+            ]);
+        }
+
+        if (! $departmentId || $activeAssignments->firstWhere('department_id', $departmentId)) {
+            return;
+        }
+
+        $todayAssignment = DepartmentHeadAssignment::where('user_id', $user->id)
+            ->where('department_id', $departmentId)
+            ->whereDate('start_date', now()->toDateString())
+            ->latest('created_at')
+            ->first();
+
+        if ($todayAssignment) {
+            $todayAssignment->update([
+                'is_active'     => true,
+                'end_date'      => null,
+                'appointed_by'  => auth()->id(),
+            ]);
+
+            return;
+        }
+
+        DepartmentHeadAssignment::create([
+            'department_id' => $departmentId,
+            'user_id'       => $user->id,
+            'start_date'    => now()->toDateString(),
+            'end_date'      => null,
+            'is_active'     => true,
+            'appointed_by'  => auth()->id(),
+        ]);
     }
 
     public function deleteUser(User $user)

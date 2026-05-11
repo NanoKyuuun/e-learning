@@ -2,13 +2,25 @@
 import { Head, Link } from '@inertiajs/vue3';
 import { ref, onMounted, onUnmounted } from 'vue';
 
+const props = defineProps({
+    stats: {
+        type: Object,
+        default: () => ({
+            total_students: 0,
+            total_teachers: 0,
+            total_subjects: 0,
+            total_meetings:  0,
+        }),
+    },
+});
+
 const scrollY = ref(0);
 const navSolid = ref(false);
 const counters = ref([
-    { label: 'Siswa Aktif', value: 0, target: 1240, suffix: '+', icon: '🎓' },
-    { label: 'Guru Pengajar', value: 0, target: 87, suffix: '', icon: '👨‍🏫' },
-    { label: 'Mata Pelajaran', value: 0, target: 42, suffix: '', icon: '📚' },
-    { label: 'Pertemuan', value: 0, target: 3600, suffix: '+', icon: '📅' },
+    { label: 'Siswa Aktif',    value: 0, target: props.stats.total_students, suffix: '',  icon: '🎓' },
+    { label: 'Guru Pengajar',  value: 0, target: props.stats.total_teachers, suffix: '',  icon: '👨‍🏫' },
+    { label: 'Mata Pelajaran', value: 0, target: props.stats.total_subjects, suffix: '',  icon: '📚' },
+    { label: 'Pertemuan',      value: 0, target: props.stats.total_meetings,  suffix: '+', icon: '📅' },
 ]);
 const statsVisible = ref(false);
 let statsObserver = null;
@@ -148,7 +160,7 @@ const roles = [
 </script>
 
 <template>
-    <Head title="Beranda — E-Learning Face Recognition" />
+    <Head title="Beranda — E-Learning SMKN 5 Padang" />
 
     <div class="font-sans antialiased bg-white text-gray-900">
 
@@ -163,12 +175,19 @@ const roles = [
         >
             <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-blue-600 flex items-center justify-center shadow-lg">
-                        <span class="text-white text-sm font-black">E</span>
+                    <img
+                        src="/assets/images/LogoSMKN5.png"
+                        alt="Logo SMKN 5 Padang"
+                        class="w-9 h-9 object-contain drop-shadow-lg"
+                    />
+                    <div class="flex flex-col leading-tight">
+                        <span class="text-white font-black text-base tracking-tight">
+                            E-<span class="text-violet-400">Learning</span>
+                        </span>
+                        <span class="text-gray-400 text-[10px] font-semibold tracking-widest uppercase">
+                            SMKN 5 Padang
+                        </span>
                     </div>
-                    <span class="text-white font-black text-xl tracking-tight">
-                        E-<span class="text-violet-400">Learning</span>
-                    </span>
                 </div>
                 <div class="flex items-center gap-3">
                     <Link
@@ -209,7 +228,7 @@ const roles = [
                     <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold mb-6"
                          style="background: rgba(139,92,246,0.15); border: 1px solid rgba(139,92,246,0.3); color: #c4b5fd;">
                         <span class="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse"></span>
-                        Teknologi AI · Face Recognition
+                        Teknologi · Face Recognition
                     </div>
 
                     <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-tight mb-6">
@@ -291,18 +310,43 @@ const roles = [
         </section>
 
         <!-- ===== STATS ===== -->
-        <section id="stats-section" class="py-16 bg-white border-b border-gray-100">
-            <div class="max-w-5xl mx-auto px-6 grid grid-cols-2 lg:grid-cols-4 gap-8">
-                <div
-                    v-for="c in counters"
-                    :key="c.label"
-                    class="text-center"
-                >
-                    <div class="text-3xl mb-1">{{ c.icon }}</div>
-                    <div class="text-3xl sm:text-4xl font-black text-gray-900">
-                        {{ c.value.toLocaleString('id-ID') }}{{ c.suffix }}
+        <section id="stats-section" class="py-16 border-b border-gray-100"
+                 style="background: linear-gradient(135deg, #f5f3ff 0%, #eff6ff 50%, #f0fdf4 100%);">
+            <div class="max-w-5xl mx-auto px-6">
+                <!-- Section label -->
+                <div class="text-center mb-10">
+                    <span class="text-violet-600 font-bold text-xs uppercase tracking-widest">SMKN 5 Padang dalam Angka</span>
+                </div>
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div
+                        v-for="(c, idx) in counters"
+                        :key="c.label"
+                        class="relative text-center bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+                    >
+                        <!-- Accent top bar per stat -->
+                        <div
+                            class="absolute top-0 left-0 right-0 h-1 rounded-t-2xl"
+                            :style="[
+                                'background: linear-gradient(90deg, #7c3aed, #a78bfa)',
+                                'background: linear-gradient(90deg, #2563eb, #60a5fa)',
+                                'background: linear-gradient(90deg, #059669, #34d399)',
+                                'background: linear-gradient(90deg, #d97706, #fbbf24)',
+                            ][idx % 4]"
+                        ></div>
+                        <div class="text-3xl mb-2">{{ c.icon }}</div>
+                        <div
+                            class="text-3xl sm:text-4xl font-black"
+                            :style="[
+                                'color: #7c3aed',
+                                'color: #2563eb',
+                                'color: #059669',
+                                'color: #d97706',
+                            ][idx % 4]"
+                        >
+                            {{ c.value.toLocaleString('id-ID') }}{{ c.suffix }}
+                        </div>
+                        <div class="text-sm text-gray-500 font-semibold mt-1">{{ c.label }}</div>
                     </div>
-                    <div class="text-sm text-gray-500 font-medium mt-1">{{ c.label }}</div>
                 </div>
             </div>
         </section>
@@ -433,14 +477,18 @@ const roles = [
         <footer class="bg-gray-950 text-gray-500 py-10">
             <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div class="flex items-center gap-3">
-                    <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-blue-600 flex items-center justify-center">
-                        <span class="text-white text-xs font-black">E</span>
+                    <img
+                        src="/assets/images/LogoSMKN5.png"
+                        alt="Logo SMKN 5 Padang"
+                        class="w-7 h-7 object-contain opacity-90"
+                    />
+                    <div class="flex flex-col leading-tight">
+                        <span class="text-white font-bold text-sm">E-Learning SMKN 5 Padang</span>
+                        <span class="text-gray-600 text-xs">Face Recognition System</span>
                     </div>
-                    <span class="text-white font-bold text-base">E-Learning</span>
-                    <span class="text-gray-600 text-sm">Face Recognition System</span>
                 </div>
                 <p class="text-xs text-gray-600 text-center">
-                    © {{ new Date().getFullYear() }} E-Learning Sekolah. Dibangun dengan ❤️ untuk pendidikan Indonesia.
+                    © {{ new Date().getFullYear() }} SMKN 5 Padang. Dibangun dengan ❤️ untuk pendidikan Indonesia.
                 </p>
                 <Link :href="route('login')" class="text-violet-400 hover:text-violet-300 text-sm font-medium transition-colors">
                     Login →

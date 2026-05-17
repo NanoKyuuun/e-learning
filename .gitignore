@@ -29,7 +29,3 @@ __pycache__/
 .DS_Store
 Thumbs.db
 setup_summary.txt
-run.bat
-run.ps1
-setup.bat
-setup.ps1

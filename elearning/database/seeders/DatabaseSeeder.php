@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             AcademicSeeder::class,
             EnrollmentSeeder::class,
             DummyDataSeeder::class,
+            AiUsageLimitsSeeder::class,
         ]);
     }
 }

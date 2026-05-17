@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\SubjectController;
 use App\Http\Controllers\Admin\TeacherController;
 use App\Http\Controllers\Admin\TeachingAssignmentController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\AiSettingController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'role:admin-sistem'])->prefix('admin')->name('admin.')->group(function () {
@@ -49,4 +50,9 @@ Route::middleware(['auth', 'role:admin-sistem'])->prefix('admin')->name('admin.'
         Route::post('/students/{student}/resync', [FaceProfileController::class, 'resync'])->name('resync');
         Route::delete('/students/{student}', [FaceProfileController::class, 'destroy'])->name('destroy');
     });
+
+    // ── AI Settings ─────────────────────────────────────────────────────
+    Route::get('/ai/settings', [AiSettingController::class, 'index'])->name('ai.settings.index');
+    Route::patch('/ai/settings', [AiSettingController::class, 'update'])->name('ai.settings.update');
+    Route::get('/ai/health', [AiSettingController::class, 'health'])->name('ai.health');
 });

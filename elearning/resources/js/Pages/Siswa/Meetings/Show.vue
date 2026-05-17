@@ -1,21 +1,27 @@
 <script setup>
 import SiswaLayout from '@/Layouts/SiswaLayout.vue';
+import AiChatBox from '@/Components/Ai/AiChatBox.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import {
     FileText, ClipboardList, Download, ArrowLeft, Calendar, User,
-    Camera, CheckCircle, XCircle, Clock, AlertTriangle, Loader2, ShieldCheck
+    Camera, CheckCircle, XCircle, Clock, AlertTriangle, Loader2, ShieldCheck, Sparkles
 } from 'lucide-vue-next';
 import { ref, computed } from 'vue';
 import axios from 'axios';
 import { router } from '@inertiajs/vue3';
 
 const props = defineProps({
-    meeting:           Object,
-    myAttendance:      Object,
-    faceProfileStatus: Object,
+    meeting:              Object,
+    myAttendance:         Object,
+    faceProfileStatus:    Object,
     isEnrolledForAttendance: Boolean,
-    isAttendanceOpen:  Boolean,
+    isAttendanceOpen:     Boolean,
+    aiDocuments:          { type: Array,  default: () => [] },
+    aiDailyRemaining:     { type: Number, default: 20 },
+    aiWebSearchEnabled:   { type: Boolean, default: true },
 });
+
+const showAiPanel = ref(false);
 
 // ─── Camera State ───────────────────────────────────────────────────────────
 const showCameraModal   = ref(false);
@@ -330,6 +336,34 @@ const submitAttendance = () => {
                 </div>
             </div>
         </div>
+
+        <!-- ════════════════════════════════════════════════════════════
+             PANEL AI ASSISTANT
+        ════════════════════════════════════════════════════════════ -->
+        <div class="mt-8">
+            <!-- Toggle Button -->
+            <button
+                @click="showAiPanel = !showAiPanel"
+                class="w-full btn bg-gradient-to-r from-primary to-violet-600 text-white shadow-xl shadow-primary/30 rounded-3xl gap-3 hover:shadow-primary/50 transition-all">
+                <div class="w-7 h-7 bg-white/20 rounded-xl flex items-center justify-center">
+                    <Sparkles class="w-4 h-4" />
+                </div>
+                <span class="font-black">{{ showAiPanel ? 'Sembunyikan' : 'Buka' }} AI Learning Assistant</span>
+                <span class="ml-auto badge bg-white/20 text-white border-none text-xs">BETA</span>
+            </button>
+
+            <!-- AI Panel -->
+            <div v-if="showAiPanel" class="mt-4">
+                <AiChatBox
+                    :meeting="meeting"
+                    role="siswa"
+                    :documents="aiDocuments"
+                    :initial-limit="aiDailyRemaining"
+                    :web-search-enabled="aiWebSearchEnabled"
+                />
+            </div>
+        </div>
+        <!-- ════════════════════════════════════════════════════════════ -->
 
         <!-- ════════════════════════════════════════════════════════════
              MODAL KAMERA ABSENSI

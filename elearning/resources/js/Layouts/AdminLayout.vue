@@ -11,7 +11,8 @@ import {
     Bell,
     School,
     GraduationCap,
-    UsersRound
+    UsersRound,
+    Sparkles
 } from 'lucide-vue-next';
 </script>
 
@@ -81,6 +82,17 @@ import {
             <li>
                 <Link :href="route('admin.face-profiles.index')" :class="{ 'active bg-primary/10 text-primary font-bold': $page.url.startsWith('/admin/face-profiles') }">
                     <Camera class="w-5 h-5"/> Kelola Wajah Siswa
+                </Link>
+            </li>
+
+            <li class="menu-title uppercase text-[10px] font-black opacity-40 tracking-widest mt-6 mb-2">AI Settings</li>
+            <li>
+                <Link :href="route('admin.ai.settings.index')" :class="{ 'active bg-primary/10 text-primary font-bold': $page.url.startsWith('/admin/ai') }">
+                    <div class="flex items-center gap-2">
+                        <Sparkles class="w-5 h-5 text-primary"/>
+                        <span>Pengaturan AI</span>
+                        <span class="badge badge-primary badge-xs font-bold ml-auto">BETA</span>
+                    </div>
                 </Link>
             </li>
         </template>

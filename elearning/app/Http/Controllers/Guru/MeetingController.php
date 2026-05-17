@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Guru;
 
 use App\Http\Controllers\Controller;
+use App\Models\Ai\AiDocument;
 use App\Models\Meeting;
 use App\Models\TeachingAssignment;
 use App\Services\Guru\MeetingService;
@@ -78,17 +79,68 @@ class MeetingController extends Controller
             'absent'  => $enrolledStudents->whereNull('attendance')->count(),
         ];
 
+        // Muat meeting termasuk materials
+        $meeting->load([
+            'teachingAssignment.classGroup',
+            'teachingAssignment.subject',
+            'materials',
+            'assignments' => function ($query) {
+                $query->withCount('submissions');
+            }
+        ]);
+
+        // Gabungkan semua materials dengan status AI-nya
+        // Sehingga guru bisa melihat semua materi sekaligus + statusnya
+        $aiDocsByMaterial = AiDocument::where('meeting_id', $meeting->id)
+            ->whereNotNull('material_id')
+            ->get()
+            ->keyBy('material_id');
+
+        // Materials yang sudah punya AiDocument
+        $mergedDocuments = $meeting->materials->map(function ($material) use ($aiDocsByMaterial, $meeting) {
+            $aiDoc = $aiDocsByMaterial->get($material->id);
+            return [
+                // Material source info
+                'material_id'      => $material->id,
+                'material_title'   => $material->title,
+                'material_file_url'=> $material->file_url,
+                // AiDocument info (null jika belum pernah diproses)
+                'id'               => $aiDoc?->id,
+                'title'            => $aiDoc?->title ?? $material->title,
+                'original_filename'=> $aiDoc?->original_filename ?? basename($material->file_url ?? ''),
+                'file_extension'   => $aiDoc?->file_extension,
+                'processing_status'=> $aiDoc?->processing_status ?? 'not_started',
+                'total_chunks'     => $aiDoc?->total_chunks ?? 0,
+                'total_pages'      => $aiDoc?->total_pages,
+                'total_sheets'     => $aiDoc?->total_sheets,
+                'error_message'    => $aiDoc?->error_message,
+            ];
+        });
+
+        // AiDocument yang tidak punya material (diunggah langsung ke AI)
+        $orphanAiDocs = AiDocument::where('meeting_id', $meeting->id)
+            ->whereNull('material_id')
+            ->get()
+            ->map(fn ($d) => [
+                'material_id'      => null,
+                'material_title'   => null,
+                'material_file_url'=> null,
+                'id'               => $d->id,
+                'title'            => $d->title,
+                'original_filename'=> $d->original_filename,
+                'file_extension'   => $d->file_extension,
+                'processing_status'=> $d->processing_status,
+                'total_chunks'     => $d->total_chunks,
+                'total_pages'      => $d->total_pages,
+                'total_sheets'     => $d->total_sheets,
+                'error_message'    => $d->error_message,
+            ]);
+
         return Inertia::render('Guru/Meetings/Show', [
-            'meeting' => $meeting->load([
-                'teachingAssignment.classGroup',
-                'teachingAssignment.subject',
-                'materials',
-                'assignments' => function ($query) {
-                    $query->withCount('submissions');
-                }
-            ]),
+            'meeting'           => $meeting,
             'enrolledStudents'  => $enrolledStudents,
             'attendanceSummary' => $attendanceSummary,
+            'aiDocuments'       => $mergedDocuments->merge($orphanAiDocs)->values(),
         ]);
     }
 

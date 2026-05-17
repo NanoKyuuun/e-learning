@@ -7,6 +7,7 @@ use App\Http\Controllers\Guru\FaceProfileController;
 use App\Http\Controllers\Guru\GradeController;
 use App\Http\Controllers\Guru\MaterialController;
 use App\Http\Controllers\Guru\MeetingController;
+use App\Http\Controllers\Guru\AiMaterialController;
 use App\Models\TeachingAssignment;
 use App\Models\Meeting;
 use Illuminate\Support\Facades\Route;
@@ -88,4 +89,13 @@ Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(f
             Route::post('/resync-class', [FaceProfileController::class, 'resyncClass'])->name('resync-class');
             Route::post('/students/{student}/resync', [FaceProfileController::class, 'resync'])->name('resync');
         });
+
+    // ── AI Features ─────────────────────────────────────────────────────
+    Route::post('/materials/{material}/ai/process', [AiMaterialController::class, 'process'])->name('materials.ai.process');
+    Route::post('/meetings/{meeting}/ai/summary', [AiMaterialController::class, 'summary'])->name('meetings.ai.summary');
+    Route::post('/meetings/{meeting}/ai/quiz', [AiMaterialController::class, 'quiz'])->name('meetings.ai.quiz');
+    Route::post('/meetings/{meeting}/ai/glossary', [AiMaterialController::class, 'glossary'])->name('meetings.ai.glossary');
+    Route::get('/meetings/{meeting}/ai/outputs', [AiMaterialController::class, 'outputs'])->name('meetings.ai.outputs');
+    Route::get('/ai/outputs/{output}', [AiMaterialController::class, 'showOutput'])->name('ai.outputs.show');
+    Route::delete('/ai/outputs/{output}', [AiMaterialController::class, 'destroyOutput'])->name('ai.outputs.destroy');
 });

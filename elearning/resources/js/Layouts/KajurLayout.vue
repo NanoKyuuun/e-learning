@@ -13,7 +13,8 @@ import {
     UsersRound,
     UserCheck,
     Bell,
-    Megaphone
+    Megaphone,
+    Sparkles
 } from 'lucide-vue-next';
 </script>
 
@@ -48,6 +49,17 @@ import {
             <li>
                 <Link :href="route('kajur.monitoring.grades')" :class="{ 'active bg-primary/10 text-primary font-bold': $page.url === '/kajur/monitoring/grades' }">
                     <FileText class="w-5 h-5"/> Rekap Nilai
+                </Link>
+            </li>
+
+            <li class="menu-title uppercase text-[10px] font-black opacity-40 tracking-widest mt-6 mb-2">AI Analytics</li>
+            <li>
+                <Link :href="route('kajur.ai.monitoring')" :class="{ 'active bg-primary/10 text-primary font-bold': $page.url.startsWith('/kajur/ai') }">
+                    <div class="flex items-center gap-2">
+                        <Sparkles class="w-5 h-5 text-primary"/>
+                        <span>Monitoring AI</span>
+                        <span class="badge badge-primary badge-xs font-bold ml-auto">BETA</span>
+                    </div>
                 </Link>
             </li>
         </template>

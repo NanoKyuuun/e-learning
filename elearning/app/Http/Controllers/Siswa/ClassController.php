@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Siswa;
 
 use App\Http\Controllers\Controller;
+use App\Models\Ai\AiDocument;
+use App\Models\Ai\AiUsageLog;
+use App\Models\Ai\AiUsageLimit;
 use App\Models\Attendance;
 use App\Models\Meeting;
 use App\Models\StudentClassEnrollment;
@@ -12,6 +15,7 @@ use App\Services\Shared\AcademicService;
 use App\Services\Siswa\StudentAcademicService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Inertia\Inertia;
 
 class ClassController extends Controller
@@ -82,6 +86,20 @@ class ClassController extends Controller
                 ->first()
             : null;
 
+        // ── AI data ──
+        $aiDocuments = AiDocument::where('meeting_id', $meeting->id)
+            ->where('processing_status', 'completed')
+            ->get(['id','title','original_filename','file_extension','processing_status','total_chunks']);
+
+        $userId = (string) auth()->id();
+        $todayUsed = AiUsageLog::where('user_id', $userId)
+            ->where('feature', 'chat')
+            ->whereDate('created_at', Carbon::today())
+            ->count();
+        $limit = AiUsageLimit::where('role', 'siswa')->value('daily_chat_limit') ?? 20;
+        $remaining = max(0, $limit - $todayUsed);
+        $webSearchEnabled = (bool) config('services.ai_service.web_search_enabled', true);
+
         return Inertia::render('Siswa/Meetings/Show', [
             'meeting' => $meeting->load([
                 'teachingAssignment.subject',
@@ -95,10 +113,8 @@ class ClassController extends Controller
                         ->orderBy('due_at');
                 },
             ]),
-            // Status absensi siswa di meeting ini
-            'myAttendance' => $myAttendance,
-            // Status face profile untuk menentukan apakah bisa absen
-            'faceProfileStatus' => $faceProfile ? [
+            'myAttendance'           => $myAttendance,
+            'faceProfileStatus'      => $faceProfile ? [
                 'exists'      => true,
                 'sync_status' => $faceProfile->sync_status,
                 'is_active'   => $faceProfile->is_active,
@@ -110,8 +126,11 @@ class ClassController extends Controller
                 'is_ready'    => false,
             ],
             'isEnrolledForAttendance' => $isEnrolledForAttendance,
-            // Apakah absensi sedang terbuka
-            'isAttendanceOpen' => $meeting->isAttendanceOpen(),
+            'isAttendanceOpen'        => $meeting->isAttendanceOpen(),
+            // AI
+            'aiDocuments'         => $aiDocuments,
+            'aiDailyRemaining'    => $remaining,
+            'aiWebSearchEnabled'  => $webSearchEnabled,
         ]);
     }
 

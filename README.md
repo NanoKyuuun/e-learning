@@ -1,109 +1,72 @@
-# E-Learning Siswa (Laravel 13 + Inertia Vue)
+# E-Learning Siswa (Laravel 13 + Inertia Vue + AI Integration)
 
-Sistem Manajemen Pembelajaran (LMS) modern yang dirancang untuk sekolah dengan pemisahan peran yang jelas antara Admin Sistem, Kepala Jurusan (Kajur), Guru, dan Siswa. Project ini dibangun dengan fokus pada integritas data, keamanan akses (Policies), dan arsitektur kode yang bersih.
+Sistem Manajemen Pembelajaran (LMS) modern yang dirancang untuk sekolah dengan pemisahan peran yang jelas antara Admin Sistem, Kepala Jurusan (Kajur), Guru, dan Siswa. Project ini kini dilengkapi dengan **AI Tutoring System** dan **Face Recognition Authentication**.
 
 ## 🚀 Tech Stack
 
+### Core Application (Laravel)
 - **Framework**: Laravel 13.x
 - **Frontend**: Vue.js 3 (Composition API) via Inertia.js
 - **Styling**: Tailwind CSS 4.0 & DaisyUI 5.0
-- **Icons**: Lucide Vue Next
-- **Role Management**: Spatie Laravel Permission
-- **Routing**: Tighten Ziggy (Vue Integration)
-- **Database**: PostgreSQL (Conceptual) / MySQL & SQLite (Dev)
+- **Database**: MySQL 8.0 / PostgreSQL
+
+### AI Service (Python FastAPI)
+- **Engine**: OpenRouter API (Access to DeepSeek, Claude, GPT-4, etc.)
+- **RAG System**: Document Parsing (PDF, DOCX, XLSX) & Retrieval
+- **Web Search**: Integrated DuckDuckGo Search for real-time tutoring.
+
+### Face Recognition Service (Python Flask/FastAPI)
+- **Model**: Dlib / Face_Recognition
+- **Features**: Enrollment, Verification, & Storage Management.
 
 ## ✨ Fitur Utama
 
-### 🛠️ Admin Sistem (Technical Controller)
-- **Manajemen User**: CRUD Akun (Guru, Siswa, Kajur) dengan pembuatan profil otomatis.
-- **Konfigurasi Akademik**: Pengaturan Tahun Ajaran & Semester (Single Active Semester enforcement).
-- **Struktur Sekolah**: Manajemen Jurusan / Departemen.
+### 🤖 AI Tutoring & Learning Support
+- **AI Tutor for Students**: Chatbot interaktif yang memahami konteks materi pelajaran.
+- **Automated Material Generation**: Guru dapat membuat materi/tugas secara otomatis menggunakan AI.
+- **Document Insight**: Bertanya langsung pada materi yang diunggah (RAG).
+- **Web Search Integration**: AI dapat mencari referensi terbaru dari internet.
 
-### 🏛️ Kepala Jurusan (Academic Manager)
-- **Manajemen Kurikulum**: CRUD Mata Pelajaran per Jurusan.
-- **Rombongan Belajar**: Pengelolaan Kelas, Anggota Kelas, dan Wali Kelas.
-- **Plotting Pengampu**: Penugasan Guru mengajar Mapel di Kelas tertentu.
-- **Jadwal Pelajaran**: Pengaturan hari, jam, dan ruangan belajar.
-- **Monitoring**: Pantau progres pertemuan guru dan rekapitulasi nilai seluruh siswa.
+### 🎭 Face Recognition Authentication
+- **Secure Login**: Verifikasi wajah untuk akses siswa/guru.
+- **Auto-Sync**: Sinkronisasi data wajah antara Laravel dan Python service.
 
-### 👨‍🏫 Guru (Learning Manager)
-- **Manajemen Pertemuan**: Membuat sesi belajar (Pertemuan 1, 2, dst) dengan sistem Draft/Publish.
-- **Konten Pembelajaran**: Unggah materi (file/link) dan buat tugas detail di setiap sesi.
-- **Pusat Penilaian**: Lihat daftar submission, beri nilai (0-100), dan berikan feedback membangun.
-- **Dashboard Statistik**: Pantau aktivitas pengumpulan tugas terbaru dari seluruh kelas.
-
-### 🎓 Siswa (Learning Experience)
-- **Ruang Belajar**: Akses materi dan tugas berdasarkan kelas aktif.
-- **Pengiriman Tugas**: Kirim jawaban dalam bentuk teks online atau lampiran file.
-- **Transparansi Nilai**: Lihat rekapitulasi nilai dan feedback guru secara real-time.
-- **Profil Mandiri**: Kelola data diri dan keamanan akun (Ganti Password).
+### 🏛️ Role Management
+- **Admin**: Technical control & AI configuration.
+- **Kajur**: Monitoring akademik & AI usage analytics.
+- **Guru**: Manajemen pertemuan & AI-assisted teaching.
+- **Siswa**: Personalized learning experience with AI.
 
 ## 📂 Arsitektur Project
 
-Project ini mengikuti standar engineering tinggi:
-- **Service Layer**: Logika bisnis dipusat di `app/Services` untuk menjaga Controller tetap tipis.
-- **Form Requests**: Validasi data dipisah ke `app/Http/Requests`.
-- **Laravel Policies**: Keamanan data dijamin di level model untuk mencegah akses lintas user.
-- **Universal Components**: Komponen form (TextInput, Select, dll) dibuat reusable di `resources/js/Components`.
+Project ini menggunakan arsitektur microservices-lite:
+1. **`elearning/`**: Laravel App (Orchestrator & UI).
+2. **`AI_elearning/`**: AI Service (NLP & RAG).
+3. **`face_recognition/`**: Face API (Biometric Auth).
 
-## 🐳 Docker Staging (Live Test)
+## 🐳 Docker Deployment
 
-Project ini menggunakan struktur kontainer terpisah untuk PHP-FPM, Nginx, dan MySQL.
+Project ini menggunakan `docker-compose.yml` untuk menjalankan semua service sekaligus.
 
-1. **Jalankan dengan Docker Compose**
+1. **Persiapan .env**
+   Pastikan file `.env` sudah dikonfigurasi di folder root, `elearning/`, `AI_elearning/`, dan `face_recognition/`.
+
+2. **Jalankan Services**
    ```bash
-   cd elearning
    docker-compose up -d --build
    ```
 
-2. **Akses Aplikasi**
-   Aplikasi akan berjalan di `http://localhost:8085`.
+3. **Akses**
+   - Web App: `http://localhost:8085`
+   - AI API: `http://localhost:8000`
+   - Face API: `http://localhost:5000`
 
-3. **Setup Aplikasi di Container**
-   ```bash
-   docker-compose exec app composer install
-   docker-compose exec app php artisan key:generate
-   docker-compose exec app php artisan migrate --seed
-   docker-compose exec app php artisan storage:link
-   ```
+## 🛠️ Instalasi Lokal
 
-## 🛠️ Instalasi Lokal (Non-Docker)
-
-1. **Clone Repository**
-   ```bash
-   git clone https://github.com/NanoKyuuun/e-learning.git
-   cd e-learning/elearning
-   ```
-
-2. **Install Dependencies**
-   ```bash
-   composer install
-   npm install
-   ```
-
-3. **Konfigurasi Environment**
-   ```bash
-   cp .env.example .env
-   php artisan key:generate
-   ```
-
-4. **Setup Database** (Sesuaikan di `.env`)
-   ```bash
-   php artisan migrate --seed
-   ```
-
-5. **Jalankan Aplikasi**
-   ```bash
-   php artisan serve
-   npm run dev
-   ```
-
-## 📝 Dokumentasi Perencanaan
-Project dibangun berdasarkan blueprint berikut:
-- [Conceptual ERD](./erd_konseptual_elearning.md)
-- [Sistem Flow](./flow_sistem_elearning_role_terpisah_dengan_alur.md)
-- [Roadmap Implementasi](./roadmap_implementasi_laravel_elearning_bertahap_v2.md)
-- [Struktur Folder](./struktur_folder_laravel_elearning_dengan_daisyui.md)
+Lihat panduan detail di masing-masing folder:
+- [Laravel Setup](./elearning/README.md)
+- [AI Service Setup](./AI_elearning/README.md)
+- [Face API Setup](./face_recognition/README.md)
 
 ---
 Developed by **NanoKyuuun** & **Gemini CLI** 🌙🚀

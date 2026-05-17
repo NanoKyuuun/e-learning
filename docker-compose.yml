@@ -10,6 +10,8 @@ services:
         condition: service_healthy
       face-api:
         condition: service_started
+      ai-service:
+        condition: service_started
     env_file:
       - ./elearning/.env
     environment:
@@ -27,6 +29,10 @@ services:
       FACE_API_URL: http://face-api:5000
       FACE_API_KEY: demo-secret-key
       FACE_API_TIMEOUT: 30
+      AI_SERVICE_URL: http://ai-service:8000
+      AI_SERVICE_API_KEY: secret-ai-internal-key
+      AI_SERVICE_TIMEOUT: 90
+      AI_ENABLE_WEB_SEARCH: "true"
     ports:
       - "8085:80"
     volumes:
@@ -49,6 +55,31 @@ services:
       MAX_CONTENT_LENGTH: 10485760
     volumes:
       - ./face_recognition/storage:/app/storage
+    networks:
+      - elearning-network
+
+  ai-service:
+    build:
+      context: ./AI_elearning
+      dockerfile: Dockerfile
+    container_name: elearning-ai-service
+    restart: unless-stopped
+    environment:
+      AI_SERVICE_API_KEY: secret-ai-internal-key
+      AI_PORT: 8000
+      AI_DEBUG: "False"
+      ALLOWED_ORIGINS: http://localhost:8085,http://elearning-app
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-openrouter/auto}
+      OPENROUTER_HTTP_REFERER: http://localhost:8085
+      AI_WEB_SEARCH_MODE: openrouter_server_tool
+      AI_DOCUMENT_MAX_FILE_MB: 20
+      CHUNK_SIZE: 800
+      CHUNK_OVERLAP: 100
+    volumes:
+      - ./elearning/storage:/app/laravel_storage:ro
+    ports:
+      - "8001:8000"
     networks:
       - elearning-network
 

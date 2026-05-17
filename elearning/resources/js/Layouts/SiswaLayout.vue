@@ -10,7 +10,8 @@ import {
     ClipboardCheck, 
     Award, 
     User,
-    Bell
+    Bell,
+    Sparkles
 } from 'lucide-vue-next';
 </script>
 
@@ -47,6 +48,17 @@ import {
             <li>
                 <Link :href="route('profile.edit')" :class="{ 'active bg-primary/10 text-primary font-bold': $page.url === '/profile' }">
                     <User class="w-5 h-5"/> Data Diri
+                </Link>
+            </li>
+
+            <li class="menu-title uppercase text-[10px] font-black opacity-40 tracking-widest mt-6 mb-2">AI Learning</li>
+            <li>
+                <Link :href="route('siswa.subjects.index')" :class="{ 'active bg-primary/10 text-primary font-bold': $page.url.includes('/ai/') }">
+                    <div class="flex items-center gap-2">
+                        <Sparkles class="w-5 h-5 text-primary"/>
+                        <span>AI Assistant</span>
+                        <span class="badge badge-primary badge-xs font-bold ml-auto">BETA</span>
+                    </div>
                 </Link>
             </li>
         </template>

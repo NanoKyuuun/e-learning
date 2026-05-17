@@ -3,6 +3,8 @@
 use App\Http\Controllers\Siswa\AssignmentSubmissionController;
 use App\Http\Controllers\Siswa\ClassController;
 use App\Http\Controllers\Siswa\FaceAttendanceController;
+use App\Http\Controllers\Siswa\AiTutorController;
+use App\Http\Controllers\Siswa\AiWebSearchController;
 use App\Services\Siswa\StudentAcademicService;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -39,4 +41,10 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->name('siswa.')->grou
     // student_id diambil dari auth()->user()->student, BUKAN dari request body
     Route::post('/meetings/{meeting}/attendance/face', [FaceAttendanceController::class, 'store'])
         ->name('attendance.face.store');
+
+    // ── AI Features ─────────────────────────────────────────────────────
+    Route::post('/meetings/{meeting}/ai/chat', [AiTutorController::class, 'store'])->name('meetings.ai.chat');
+    Route::post('/meetings/{meeting}/ai/free-chat', [AiTutorController::class, 'freeChat'])->name('meetings.ai.free-chat');
+    Route::get('/meetings/{meeting}/ai/history', [AiTutorController::class, 'history'])->name('meetings.ai.history');
+    Route::post('/meetings/{meeting}/ai/web-search', [AiWebSearchController::class, 'store'])->name('meetings.ai.web-search');
 });

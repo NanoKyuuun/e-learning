@@ -1,9 +1,10 @@
 <script setup>
 import GuruLayout from '@/Layouts/GuruLayout.vue';
+import AiMaterialPanel from '@/Components/Ai/AiMaterialPanel.vue';
 import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import {
     FileText, ClipboardList, Plus, Trash2, ArrowLeft, Download, ExternalLink,
-    Calendar, Clock, FileUp, Users, CheckCircle, XCircle, ShieldCheck, AlertCircle
+    Calendar, Clock, FileUp, Users, CheckCircle, XCircle, ShieldCheck, AlertCircle, Sparkles
 } from 'lucide-vue-next';
 import { ref } from 'vue';
 import TextInput from '@/Components/forms/input/TextInput.vue';
@@ -15,6 +16,7 @@ const props = defineProps({
     meeting:           Object,
     enrolledStudents:  Array,
     attendanceSummary: Object,
+    aiDocuments:       { type: Array, default: () => [] },
 });
 
 const isMaterialModalOpen = ref(false);
@@ -220,6 +222,24 @@ const closeAttendance = () => {
                 </div>
             </div>
         </div>
+
+        <!-- ════════════════════════════════════════════════════════════
+             PANEL AI TOOLS GURU
+        ════════════════════════════════════════════════════════════ -->
+        <div class="mt-8">
+            <div class="flex items-center gap-3 mb-4 px-2">
+                <div class="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Sparkles class="w-4 h-4 text-primary" />
+                </div>
+                <h2 class="text-xl font-black text-primary uppercase tracking-tight">AI Document Tools</h2>
+                <span class="badge badge-primary badge-sm font-bold">BETA</span>
+            </div>
+            <AiMaterialPanel
+                :meeting="meeting"
+                :documents="aiDocuments"
+            />
+        </div>
+        <!-- ════════════════════════════════════════════════════════════ -->
 
         <!-- Add Material Modal -->
         <input type="checkbox" id="material-modal" class="modal-toggle" :checked="isMaterialModalOpen" @change="isMaterialModalOpen = $event.target.checked" />

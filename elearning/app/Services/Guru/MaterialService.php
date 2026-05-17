@@ -4,6 +4,8 @@ namespace App\Services\Guru;
 
 use App\Models\Material;
 use App\Models\Meeting;
+use App\Models\Ai\AiDocument;
+use App\Models\Ai\AiDocumentChunk;
 use Illuminate\Support\Facades\Storage;
 
 class MaterialService
@@ -33,9 +35,18 @@ class MaterialService
 
     public function deleteMaterial(Material $material)
     {
+        // Hapus file dari storage
         if ($material->file_url) {
             Storage::disk('public')->delete($material->file_url);
         }
+
+        // Hapus AiDocument dan chunk-nya agar tidak menjadi orphan
+        $aiDoc = AiDocument::where('material_id', $material->id)->first();
+        if ($aiDoc) {
+            $aiDoc->chunks()->delete();
+            $aiDoc->delete();
+        }
+
         return $material->delete();
     }
 }

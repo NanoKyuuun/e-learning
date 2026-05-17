@@ -1,9 +1,20 @@
+# Environment files
+.env
+.env.*
+!.env.example
+
 /elearning/.env
-/elearning/.env*
+/elearning/.env.*
+!/elearning/.env.example
+
 /face_recognition/.env
-/face_recognition/.env*
+/face_recognition/.env.*
+!/face_recognition/.env.example
+
 /AI_elearning/.env
-/AI_elearning/.env*
+/AI_elearning/.env.*
+!/AI_elearning/.env.example
+
 /face_recognition/venv/
 /AI_elearning/venv/
 /face_recognition/storage/embeddings/*.json

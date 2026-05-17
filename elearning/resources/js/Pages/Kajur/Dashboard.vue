@@ -1,7 +1,7 @@
 <script setup>
 import KajurLayout from '../../Layouts/KajurLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
-import { School, Book, UserPlus, GraduationCap, ArrowRight, UserCheck, Users } from 'lucide-vue-next';
+import { MonitorCheck, FileText, ArrowRight, Megaphone } from 'lucide-vue-next';
 
 defineProps({
     stats: Object,
@@ -16,7 +16,7 @@ defineProps({
     <KajurLayout>
         <div class="mb-8">
             <h1 class="text-3xl font-black text-base-content tracking-tight uppercase">Dashboard Kajur</h1>
-            <p class="text-base-content/60 italic text-sm">Selamat datang, Kepala Jurusan. Kelola operasional akademik di sini.</p>
+            <p class="text-base-content/60 italic text-sm">Selamat datang, Kepala Jurusan. Pantau progres akademik jurusan Anda di sini.</p>
         </div>
 
         <div v-if="error" class="alert alert-warning mb-6 border-none bg-warning/10 text-warning-content/90">
@@ -74,13 +74,13 @@ defineProps({
                 <div class="bg-primary h-1"></div>
                 <div class="card-body p-8">
                     <div class="bg-primary/10 w-12 h-12 rounded-2xl flex items-center justify-center text-primary mb-2 group-hover:bg-primary group-hover:text-white transition-all">
-                        <UserCheck class="w-6 h-6" />
+                        <MonitorCheck class="w-6 h-6" />
                     </div>
-                    <h2 class="card-title text-2xl font-black tracking-tight uppercase">Plotting Pengampu</h2>
-                    <p class="text-base-content/60 italic text-sm">Tentukan guru mana yang mengajar mapel tertentu di setiap kelas untuk periode semester aktif.</p>
+                    <h2 class="card-title text-2xl font-black tracking-tight uppercase">Monitoring Progres</h2>
+                    <p class="text-base-content/60 italic text-sm">Pantau keterlaksanaan pertemuan dan materi di setiap kelas yang ada di bawah jurusan Anda.</p>
                     <div class="card-actions justify-end mt-8">
-                        <Link :href="route('kajur.teaching-assignments.index')" class="btn btn-primary shadow-lg shadow-primary/20 font-black uppercase text-xs">
-                            Mulai Plotting <ArrowRight class="w-4 h-4" />
+                        <Link :href="route('kajur.monitoring.progress')" class="btn btn-primary shadow-lg shadow-primary/20 font-black uppercase text-xs">
+                            Lihat Progres <ArrowRight class="w-4 h-4" />
                         </Link>
                     </div>
                 </div>
@@ -90,13 +90,13 @@ defineProps({
                 <div class="bg-secondary h-1"></div>
                 <div class="card-body p-8">
                     <div class="bg-secondary/10 w-12 h-12 rounded-2xl flex items-center justify-center text-secondary mb-2 group-hover:bg-secondary group-hover:text-white transition-all">
-                        <Users class="w-6 h-6" />
+                        <FileText class="w-6 h-6" />
                     </div>
-                    <h2 class="card-title text-2xl font-black tracking-tight uppercase">Anggota Kelas</h2>
-                    <p class="text-base-content/60 italic text-sm">Kelola daftar siswa di setiap rombongan belajar agar mereka dapat mengakses materi & tugas.</p>
+                    <h2 class="card-title text-2xl font-black tracking-tight uppercase">Rekap Nilai</h2>
+                    <p class="text-base-content/60 italic text-sm">Lihat dan unduh rekapitulasi nilai tugas siswa untuk seluruh mata pelajaran di jurusan Anda.</p>
                     <div class="card-actions justify-end mt-8">
-                        <Link :href="route('kajur.class-groups.index')" class="btn btn-secondary shadow-lg shadow-secondary/20 font-black uppercase text-xs text-white">
-                            Kelola Siswa <ArrowRight class="w-4 h-4" />
+                        <Link :href="route('kajur.monitoring.grades')" class="btn btn-secondary shadow-lg shadow-secondary/20 font-black uppercase text-xs text-white">
+                            Lihat Nilai <ArrowRight class="w-4 h-4" />
                         </Link>
                     </div>
                 </div>
@@ -105,19 +105,11 @@ defineProps({
 
         <!-- Shortcut Links -->
         <div class="mt-12 bg-base-100 p-8 rounded-[2.5rem] border border-base-200 shadow-sm">
-            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-30 mb-8 text-center">Infrastruktur Kurikulum & SDM</h3>
+            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-30 mb-8 text-center">Informasi & Pengumuman</h3>
             <div class="flex flex-wrap justify-center gap-6">
-                <Link :href="route('kajur.subjects.index')" class="flex items-center gap-2 group">
-                    <div class="bg-base-200 p-3 rounded-xl group-hover:bg-primary group-hover:text-white transition-all shadow-sm"><Book class="w-5 h-5" /></div>
-                    <span class="font-bold text-sm uppercase tracking-tight group-hover:text-primary transition-colors">Mata Pelajaran</span>
-                </Link>
-                <Link :href="route('kajur.teachers.index')" class="flex items-center gap-2 group">
-                    <div class="bg-base-200 p-3 rounded-xl group-hover:bg-primary group-hover:text-white transition-all shadow-sm"><GraduationCap class="w-5 h-5" /></div>
-                    <span class="font-bold text-sm uppercase tracking-tight group-hover:text-primary transition-colors">Data Guru</span>
-                </Link>
-                <Link :href="route('kajur.students.index')" class="flex items-center gap-2 group">
-                    <div class="bg-base-200 p-3 rounded-xl group-hover:bg-primary group-hover:text-white transition-all shadow-sm"><School class="w-5 h-5" /></div>
-                    <span class="font-bold text-sm uppercase tracking-tight group-hover:text-primary transition-colors">Data Siswa</span>
+                <Link :href="route('kajur.announcements.index')" class="flex items-center gap-2 group">
+                    <div class="bg-base-200 p-3 rounded-xl group-hover:bg-primary group-hover:text-white transition-all shadow-sm"><Megaphone class="w-5 h-5" /></div>
+                    <span class="font-bold text-sm uppercase tracking-tight group-hover:text-primary transition-colors">Kelola Pengumuman</span>
                 </Link>
             </div>
         </div>

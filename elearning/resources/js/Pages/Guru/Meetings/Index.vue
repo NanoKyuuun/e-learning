@@ -56,9 +56,14 @@ const deleteMeeting = (id) => {
                         Kelas: <span class="text-primary">{{ teachingAssignment.class_group.name }}</span>
                     </p>
                 </div>
-                <button @click="isModalOpen = true" class="btn btn-primary shadow-lg shadow-primary/20">
-                    <Plus class="w-5 h-5 mr-2" /> Buat Pertemuan Baru
-                </button>
+                <div class="flex gap-2">
+                    <Link :href="route('guru.attendance.recap', teachingAssignment.id)" class="btn btn-outline btn-primary shadow-sm">
+                        <ClipboardList class="w-5 h-5 mr-2" /> Rekap Kehadiran
+                    </Link>
+                    <button @click="isModalOpen = true" class="btn btn-primary shadow-lg shadow-primary/20">
+                        <Plus class="w-5 h-5 mr-2" /> Buat Pertemuan Baru
+                    </button>
+                </div>
             </div>
         </div>
 

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Guru\AssignmentController;
 use App\Http\Controllers\Guru\AssignmentGradeController;
+use App\Http\Controllers\Guru\AttendanceRecapController;
 use App\Http\Controllers\Guru\FaceProfileController;
 use App\Http\Controllers\Guru\GradeController;
 use App\Http\Controllers\Guru\MaterialController;
@@ -57,6 +58,7 @@ Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(f
     // Meetings
     Route::get('/teaching-assignments/{teachingAssignment}/meetings', [MeetingController::class, 'index'])->name('meetings.index');
     Route::post('/teaching-assignments/{teachingAssignment}/meetings', [MeetingController::class, 'store'])->name('meetings.store');
+    Route::get('/teaching-assignments/{teachingAssignment}/attendance-recap', [AttendanceRecapController::class, 'index'])->name('attendance.recap');
     Route::get('/meetings/{meeting}', [MeetingController::class, 'show'])->name('meetings.show');
     Route::patch('/meetings/{meeting}/publish', [MeetingController::class, 'publish'])->name('meetings.publish');
     Route::patch('/meetings/{meeting}/activate', [MeetingController::class, 'activate'])->name('meetings.activate');

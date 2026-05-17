@@ -38,33 +38,6 @@ import {
                     <Bell class="w-5 h-5"/> Lihat Pengumuman
                 </Link>
             </li>
-            <li>
-                <Link :href="route('kajur.subjects.index')" :class="{ 'active bg-primary/10 text-primary font-bold': $page.url.startsWith('/kajur/subjects') }">
-                    <Book class="w-5 h-5"/> Mata Pelajaran
-                </Link>
-            </li>
-            <li>
-                <Link :href="route('kajur.class-groups.index')" :class="{ 'active bg-primary/10 text-primary font-bold': $page.url.startsWith('/kajur/class-groups') }">
-                    <School class="w-5 h-5"/> Manajemen Kelas
-                </Link>
-            </li>
-            <li>
-                <Link :href="route('kajur.teaching-assignments.index')" :class="{ 'active bg-primary/10 text-primary font-bold': $page.url.startsWith('/kajur/teaching-assignments') }">
-                    <UserCheck class="w-5 h-5"/> Plotting Pengampu
-                </Link>
-            </li>
-            
-            <li class="menu-title uppercase text-[10px] font-black opacity-40 tracking-widest mt-6 mb-2">SDM Jurusan</li>
-            <li>
-                <Link :href="route('kajur.teachers.index')" :class="{ 'active bg-primary/10 text-primary font-bold': $page.url.startsWith('/kajur/teachers') }">
-                    <GraduationCap class="w-5 h-5"/> Data Guru
-                </Link>
-            </li>
-            <li>
-                <Link :href="route('kajur.students.index')" :class="{ 'active bg-primary/10 text-primary font-bold': $page.url.startsWith('/kajur/students') }">
-                    <UsersRound class="w-5 h-5"/> Data Siswa
-                </Link>
-            </li>
             
             <li class="menu-title uppercase text-[10px] font-black opacity-40 tracking-widest mt-6 mb-2">Monitoring</li>
             <li>

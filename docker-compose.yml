@@ -20,17 +20,17 @@ services:
       DB_CONNECTION: mysql
       DB_HOST: db
       DB_PORT: 3306
-      DB_DATABASE: elearning
-      DB_USERNAME: root
-      DB_PASSWORD: root
+      DB_DATABASE: ${DB_DATABASE:-elearning}
+      DB_USERNAME: ${DB_USERNAME:-root}
+      DB_PASSWORD: ${DB_PASSWORD}
       QUEUE_CONNECTION: sync
       SESSION_DRIVER: database
       CACHE_STORE: database
       FACE_API_URL: http://face-api:5000
-      FACE_API_KEY: demo-secret-key
+      FACE_API_KEY: ${FACE_API_KEY}
       FACE_API_TIMEOUT: 30
       AI_SERVICE_URL: http://ai-service:8000
-      AI_SERVICE_API_KEY: secret-ai-internal-key
+      AI_SERVICE_API_KEY: ${AI_SERVICE_API_KEY}
       AI_SERVICE_TIMEOUT: 90
       AI_ENABLE_WEB_SEARCH: "true"
     ports:
@@ -49,9 +49,10 @@ services:
     environment:
       FLASK_PORT: 5000
       FLASK_DEBUG: "False"
-      FACE_API_KEY: demo-secret-key
+      FACE_API_KEY: ${FACE_API_KEY}
       FACE_THRESHOLD: 0.45
-      ALLOWED_ORIGINS: http://localhost:8085,http://127.0.0.1:8085
+      # elearning-app = nama service Laravel di Docker network internal
+      ALLOWED_ORIGINS: http://localhost:8085,http://127.0.0.1:8085,http://elearning-app
       MAX_CONTENT_LENGTH: 10485760
     volumes:
       - ./face_recognition/storage:/app/storage
@@ -65,17 +66,27 @@ services:
     container_name: elearning-ai-service
     restart: unless-stopped
     environment:
-      AI_SERVICE_API_KEY: secret-ai-internal-key
+      AI_SERVICE_API_KEY: ${AI_SERVICE_API_KEY}
       AI_PORT: 8000
       AI_DEBUG: "False"
+      # elearning-app = nama service Laravel di Docker network internal
       ALLOWED_ORIGINS: http://localhost:8085,http://elearning-app
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
       OPENROUTER_MODEL: ${OPENROUTER_MODEL:-openrouter/auto}
+      OPENROUTER_BASE_URL: https://openrouter.ai/api/v1
       OPENROUTER_HTTP_REFERER: http://localhost:8085
+      OPENROUTER_APP_TITLE: E-Learning AI Assistant
+      OPENROUTER_TIMEOUT: 60
       AI_WEB_SEARCH_MODE: openrouter_server_tool
+      AI_WEB_SEARCH_ENGINE: auto
+      AI_WEB_SEARCH_MAX_RESULTS: 5
+      AI_WEB_SEARCH_MAX_TOTAL_RESULTS: 10
+      AI_WEB_SEARCH_CONTEXT_SIZE: medium
+      AI_WEB_SEARCH_FALLBACK_PROVIDER: duckduckgo
       AI_DOCUMENT_MAX_FILE_MB: 20
       CHUNK_SIZE: 800
       CHUNK_OVERLAP: 100
+      MAX_CHUNKS_PER_QUERY: 5
     volumes:
       - ./elearning/storage:/app/laravel_storage:ro
     ports:
@@ -89,14 +100,14 @@ services:
     restart: unless-stopped
     command: --default-authentication-plugin=mysql_native_password
     environment:
-      MYSQL_DATABASE: elearning
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ${DB_DATABASE:-elearning}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
     ports:
       - "3315:3306"
     volumes:
       - db-data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-proot"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-p${DB_PASSWORD}"]
       interval: 10s
       timeout: 5s
       retries: 12

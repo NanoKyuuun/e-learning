@@ -1,0 +1,527 @@
+// DBML Draft — ERD E-Learning Berbasis AI dan Face Recognition
+// Sumber: Laravel migrations dalam project e-learning.zip
+// Catatan: Beberapa relasi AI dibuat sebagai relasi logis karena migration hanya memberi index, bukan foreign key constraint.
+
+Table users {
+  id uuid [pk]
+  full_name varchar(150)
+  username varchar(100) [unique, null]
+  email varchar(150) [unique]
+  avatar varchar [null]
+  email_verified_at timestamp [null]
+  password varchar
+  status varchar(20)
+  last_login_at timestamp [null]
+  remember_token varchar [null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table password_reset_tokens {
+  email varchar [pk]
+  token varchar
+  created_at timestamp [null]
+}
+
+Table sessions {
+  id varchar [pk]
+  user_id uuid [null]
+  ip_address varchar(45) [null]
+  user_agent text [null]
+  payload longtext
+  last_activity int
+}
+
+Table permissions {
+  id bigint [pk, increment]
+  name varchar
+  guard_name varchar
+  created_at timestamp
+  updated_at timestamp
+  indexes {
+    (name, guard_name) [unique]
+  }
+}
+
+Table roles {
+  id bigint [pk, increment]
+  name varchar
+  guard_name varchar
+  created_at timestamp
+  updated_at timestamp
+  indexes {
+    (name, guard_name) [unique]
+  }
+}
+
+Table model_has_permissions {
+  permission_id bigint
+  model_type varchar
+  model_id uuid
+  indexes {
+    (permission_id, model_id, model_type) [pk]
+    (model_id, model_type)
+  }
+}
+
+Table model_has_roles {
+  role_id bigint
+  model_type varchar
+  model_id uuid
+  indexes {
+    (role_id, model_id, model_type) [pk]
+    (model_id, model_type)
+  }
+}
+
+Table role_has_permissions {
+  permission_id bigint
+  role_id bigint
+  indexes {
+    (permission_id, role_id) [pk]
+  }
+}
+
+Table departments {
+  id uuid [pk]
+  code varchar(50) [unique]
+  name varchar(150)
+  description text [null]
+  is_active boolean
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table academic_years {
+  id uuid [pk]
+  name varchar(20) [unique]
+  start_date date
+  end_date date
+  status varchar(20)
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table semesters {
+  id uuid [pk]
+  academic_year_id uuid
+  code varchar(20)
+  name varchar(50)
+  start_date date
+  end_date date
+  status varchar(20)
+  created_at timestamp
+  updated_at timestamp
+  indexes {
+    (academic_year_id, code) [unique]
+  }
+}
+
+Table teachers {
+  id uuid [pk]
+  user_id uuid [unique]
+  department_id uuid [null]
+  employee_number varchar(50) [unique, null]
+  phone varchar(30) [null]
+  is_active boolean
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table students {
+  id uuid [pk]
+  user_id uuid [unique]
+  student_number varchar(50) [unique, null]
+  phone varchar(30) [null]
+  gender varchar(20) [null]
+  is_active boolean
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table subjects {
+  id uuid [pk]
+  department_id uuid [null]
+  code varchar(50) [unique]
+  name varchar(150)
+  grade_level int [null]
+  description text [null]
+  is_active boolean
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table class_groups {
+  id uuid [pk]
+  department_id uuid
+  academic_year_id uuid
+  homeroom_teacher_id uuid [null]
+  code varchar(50) [unique]
+  name varchar(100)
+  grade_level int
+  capacity int [null]
+  is_active boolean
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table student_class_enrollments {
+  id uuid [pk]
+  student_id uuid
+  class_group_id uuid
+  enrolled_at date
+  status varchar(30)
+  notes text [null]
+  created_at timestamp
+  updated_at timestamp
+  indexes {
+    (student_id, class_group_id) [unique]
+  }
+}
+
+Table department_head_assignments {
+  id uuid [pk]
+  department_id uuid
+  user_id uuid
+  start_date date
+  end_date date [null]
+  is_active boolean
+  appointed_by uuid
+  created_at timestamp
+  updated_at timestamp
+  indexes {
+    (department_id, user_id, start_date) [unique]
+  }
+}
+
+Table teaching_assignments {
+  id uuid [pk]
+  teacher_id uuid
+  class_group_id uuid
+  subject_id uuid
+  semester_id uuid
+  assigned_by uuid
+  is_active boolean
+  created_at timestamp
+  updated_at timestamp
+  indexes {
+    (teacher_id, class_group_id, subject_id, semester_id) [unique]
+  }
+}
+
+Table class_schedules {
+  id uuid [pk]
+  teaching_assignment_id uuid
+  day varchar(20)
+  start_time time
+  end_time time
+  room_name varchar [null]
+  is_active boolean
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table meetings {
+  id uuid [pk]
+  teaching_assignment_id uuid
+  schedule_id uuid [null]
+  meeting_number int
+  title varchar(150)
+  topic text [null]
+  meeting_date date [null]
+  start_time time [null]
+  end_time time [null]
+  status varchar(20)
+  published_at timestamp [null]
+  created_by uuid
+  created_at timestamp
+  updated_at timestamp
+  indexes {
+    (teaching_assignment_id, meeting_number) [unique]
+  }
+}
+
+Table materials {
+  id uuid [pk]
+  meeting_id uuid
+  title varchar(150)
+  description text [null]
+  file_url text [null]
+  file_type varchar(50) [null]
+  published_at timestamp [null]
+  created_by uuid
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table assignments {
+  id uuid [pk]
+  meeting_id uuid
+  title varchar(150)
+  instructions text [null]
+  file_url varchar(255) [null]
+  open_at timestamp [null]
+  due_at timestamp
+  max_score decimal(5,2)
+  submission_type varchar(50) [null]
+  status varchar(20)
+  created_by uuid
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table assignment_submissions {
+  id uuid [pk]
+  assignment_id uuid
+  student_id uuid
+  submitted_at timestamp [null]
+  submission_text text [null]
+  file_url text [null]
+  status varchar(30)
+  student_notes text [null]
+  created_at timestamp
+  updated_at timestamp
+  indexes {
+    (assignment_id, student_id) [unique]
+  }
+}
+
+Table assignment_grades {
+  id uuid [pk]
+  submission_id uuid [unique]
+  graded_by_teacher_id uuid
+  score decimal(5,2)
+  feedback text [null]
+  graded_at timestamp
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table face_profiles {
+  id uuid [pk]
+  student_id uuid [unique]
+  user_id uuid
+  image_path varchar(500) [null]
+  image_hash varchar(64) [null]
+  sync_status enum('pending','syncing','synced','failed','disabled')
+  last_synced_at timestamp [null]
+  sync_error text [null]
+  is_active boolean
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table attendances {
+  id uuid [pk]
+  meeting_id uuid
+  student_id uuid
+  user_id uuid
+  status enum('present','late','failed','manual','excused','absent')
+  verification_method varchar(30)
+  face_verified boolean [null]
+  face_distance decimal(8,6) [null]
+  check_in_at timestamp [null]
+  metadata json [null]
+  created_at timestamp
+  updated_at timestamp
+  indexes {
+    (meeting_id, student_id) [unique]
+    (student_id, meeting_id)
+  }
+}
+
+Table attendance_attempts {
+  id uuid [pk]
+  meeting_id uuid
+  student_id uuid
+  user_id uuid
+  success boolean
+  reason varchar(200) [null]
+  face_distance decimal(8,6) [null]
+  face_count tinyint [null]
+  metadata json [null]
+  created_at timestamp
+  updated_at timestamp
+  indexes {
+    (student_id, meeting_id)
+  }
+}
+
+Table announcements {
+  id uuid [pk]
+  title varchar(200)
+  body longtext
+  target_role varchar(50)
+  status varchar(30)
+  start_at timestamp [null]
+  end_at timestamp [null]
+  created_by uuid
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table ai_documents {
+  id uuid [pk]
+  material_id uuid [null]
+  assignment_id uuid [null]
+  meeting_id uuid
+  teaching_assignment_id uuid
+  uploaded_by uuid
+  title varchar
+  original_filename varchar
+  file_path text
+  mime_type varchar [null]
+  file_extension varchar(10)
+  file_size bigint
+  sha256_hash varchar(64) [null]
+  processing_status varchar(20)
+  error_message text [null]
+  total_pages int [null]
+  total_sheets int [null]
+  total_chunks int
+  processed_at timestamp [null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table ai_document_chunks {
+  id uuid [pk]
+  ai_document_id uuid
+  chunk_index int
+  page_number int [null]
+  sheet_name varchar [null]
+  heading varchar [null]
+  content longtext
+  token_estimate int [null]
+  embedding json [null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table ai_chat_sessions {
+  id uuid [pk]
+  user_id uuid
+  role varchar(20)
+  meeting_id uuid [null]
+  teaching_assignment_id uuid [null]
+  mode varchar(20)
+  title varchar [null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table ai_chat_messages {
+  id uuid [pk]
+  session_id uuid
+  sender varchar(20)
+  message longtext
+  sources_json json [null]
+  server_tool_usage_json json [null]
+  model varchar [null]
+  prompt_tokens int [null]
+  completion_tokens int [null]
+  latency_ms int [null]
+  created_at timestamp [null]
+}
+
+Table ai_usage_limits {
+  id uuid [pk]
+  role varchar(30) [unique]
+  daily_chat_limit int
+  daily_web_search_limit int
+  daily_document_process_limit int
+  max_file_size_mb int
+  is_active boolean
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table ai_usage_logs {
+  id uuid [pk]
+  user_id uuid
+  feature varchar(30)
+  meeting_id uuid [null]
+  ai_document_id uuid [null]
+  model varchar [null]
+  web_search_requests int [null]
+  status varchar(10)
+  error_message text [null]
+  latency_ms int [null]
+  created_at timestamp [null]
+}
+
+Table ai_generated_outputs {
+  id uuid [pk]
+  user_id uuid
+  meeting_id uuid
+  ai_document_id uuid [null]
+  output_type varchar(30)
+  title varchar [null]
+  content_json json
+  created_at timestamp
+  updated_at timestamp
+}
+
+Ref: roles.id < model_has_roles.role_id
+Ref: permissions.id < model_has_permissions.permission_id
+Ref: permissions.id < role_has_permissions.permission_id
+Ref: roles.id < role_has_permissions.role_id
+
+Ref: users.id < sessions.user_id
+Ref: academic_years.id < semesters.academic_year_id
+Ref: users.id < teachers.user_id
+Ref: departments.id < teachers.department_id
+Ref: users.id < students.user_id
+Ref: departments.id < subjects.department_id
+Ref: departments.id < class_groups.department_id
+Ref: academic_years.id < class_groups.academic_year_id
+Ref: teachers.id < class_groups.homeroom_teacher_id
+Ref: students.id < student_class_enrollments.student_id
+Ref: class_groups.id < student_class_enrollments.class_group_id
+Ref: departments.id < department_head_assignments.department_id
+Ref: users.id < department_head_assignments.user_id
+Ref: users.id < department_head_assignments.appointed_by
+Ref: teachers.id < teaching_assignments.teacher_id
+Ref: class_groups.id < teaching_assignments.class_group_id
+Ref: subjects.id < teaching_assignments.subject_id
+Ref: semesters.id < teaching_assignments.semester_id
+Ref: users.id < teaching_assignments.assigned_by
+Ref: teaching_assignments.id < class_schedules.teaching_assignment_id
+Ref: teaching_assignments.id < meetings.teaching_assignment_id
+Ref: class_schedules.id < meetings.schedule_id
+Ref: users.id < meetings.created_by
+Ref: meetings.id < materials.meeting_id
+Ref: users.id < materials.created_by
+Ref: meetings.id < assignments.meeting_id
+Ref: users.id < assignments.created_by
+Ref: assignments.id < assignment_submissions.assignment_id
+Ref: students.id < assignment_submissions.student_id
+Ref: assignment_submissions.id < assignment_grades.submission_id
+Ref: teachers.id < assignment_grades.graded_by_teacher_id
+Ref: students.id < face_profiles.student_id
+Ref: users.id < face_profiles.user_id
+Ref: meetings.id < attendances.meeting_id
+Ref: students.id < attendances.student_id
+Ref: users.id < attendances.user_id
+Ref: meetings.id < attendance_attempts.meeting_id
+Ref: students.id < attendance_attempts.student_id
+Ref: users.id < attendance_attempts.user_id
+Ref: users.id < announcements.created_by
+Ref: ai_documents.id < ai_document_chunks.ai_document_id
+Ref: ai_chat_sessions.id < ai_chat_messages.session_id
+
+// Logical refs for AI fields that are indexed in migration but not enforced as FK constraints.
+Ref: materials.id < ai_documents.material_id
+Ref: assignments.id < ai_documents.assignment_id
+Ref: meetings.id < ai_documents.meeting_id
+Ref: teaching_assignments.id < ai_documents.teaching_assignment_id
+Ref: users.id < ai_documents.uploaded_by
+Ref: users.id < ai_chat_sessions.user_id
+Ref: meetings.id < ai_chat_sessions.meeting_id
+Ref: teaching_assignments.id < ai_chat_sessions.teaching_assignment_id
+Ref: users.id < ai_usage_logs.user_id
+Ref: meetings.id < ai_usage_logs.meeting_id
+Ref: ai_documents.id < ai_usage_logs.ai_document_id
+Ref: users.id < ai_generated_outputs.user_id
+Ref: meetings.id < ai_generated_outputs.meeting_id
+Ref: ai_documents.id < ai_generated_outputs.ai_document_id

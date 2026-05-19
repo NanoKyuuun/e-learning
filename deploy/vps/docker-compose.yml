@@ -1,0 +1,67 @@
+# ============================================================
+# Docker Compose — VPS Server
+# Berisi: Laravel App + MySQL Database
+# Target: 103.247.8.84 (User: root)
+# Domain: https://elearning-smkn5.my.id → port 8085
+# ============================================================
+
+services:
+
+  # ── Laravel E-Learning App ─────────────────────────────────
+  app:
+    build:
+      context: ./elearning
+      dockerfile: Dockerfile
+    container_name: elearning-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - ./elearning/.env
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      QUEUE_CONNECTION: sync
+      SESSION_DRIVER: database
+      CACHE_STORE: database
+    ports:
+      - "8085:80"
+    volumes:
+      - ./elearning/storage:/var/www/html/storage
+    networks:
+      - vps-network
+
+  # ── MySQL Database ──────────────────────────────────────────
+  db:
+    image: mysql:8.0
+    container_name: elearning-db
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password
+    env_file:
+      - .env
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-elearning}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3315:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-p${DB_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    networks:
+      - vps-network
+
+networks:
+  vps-network:
+    driver: bridge
+
+volumes:
+  db-data:

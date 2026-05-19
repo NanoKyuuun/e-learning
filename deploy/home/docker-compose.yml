@@ -1,0 +1,52 @@
+# ============================================================
+# Docker Compose — Home Server
+# Berisi: AI Service (FastAPI) + Face Recognition Service (Flask)
+# Target: 192.168.18.73 (User: nexthive)
+# AI Domain  : https://elarning-ai-api.nexthive.id/  → port 8005
+# Face Domain: https://face-api.nexthive.id/         → port 5050
+# ============================================================
+
+services:
+
+  # ── AI Learning Assistant (Python FastAPI) ─────────────────
+  ai-service:
+    build:
+      context: ./AI_elearning
+      dockerfile: Dockerfile
+    container_name: elearning-ai-service
+    restart: unless-stopped
+    env_file:
+      - ./AI_elearning/.env
+    ports:
+      - "8005:8000"
+    volumes:
+      # Storage Laravel harus di-mount jika AI perlu baca file materi
+      # Sesuaikan path ini dengan letak folder storage Laravel di home server
+      # Jika AI dan Laravel beda server, pastikan sync storage via NFS/rsync
+      - ai-storage:/app/laravel_storage:ro
+    networks:
+      - home-network
+
+  # ── Face Recognition Service (Python Flask) ────────────────
+  face-api:
+    build:
+      context: ./face_recognition
+      dockerfile: Dockerfile
+    container_name: elearning-face-api
+    restart: unless-stopped
+    env_file:
+      - ./face_recognition/.env
+    ports:
+      - "5050:5000"
+    volumes:
+      - face-storage:/app/storage
+    networks:
+      - home-network
+
+networks:
+  home-network:
+    driver: bridge
+
+volumes:
+  ai-storage:
+  face-storage:
